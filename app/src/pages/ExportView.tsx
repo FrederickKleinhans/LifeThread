@@ -19,9 +19,10 @@ export function ExportView() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">Export</h2>
-        <p className="text-sm text-gray-500 mt-1">
-          Your data belongs to you. Export everything anytime.
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#c66b4b] mb-2">Take it with you</p>
+        <h2 className="text-3xl font-bold text-[#27231f]">Export</h2>
+        <p className="text-sm text-[#766e64] mt-2">
+          Your notes are yours. Save a copy whenever you like.
         </p>
       </div>
 
@@ -29,7 +30,7 @@ export function ExportView() {
         <button
           onClick={handleExportJSON}
           disabled={threads.length === 0}
-          className="flex flex-col items-center gap-3 p-6 bg-white border border-gray-100 rounded-xl hover:border-indigo-200 hover:shadow-sm transition-all disabled:opacity-50 disabled:hover:border-gray-100 disabled:hover:shadow-none"
+          className="flex flex-col items-center gap-3 p-6 bg-[#fbf9f6] border border-[#e6ded2] rounded-2xl hover:border-[#8f89ca] hover:shadow-[0_8px_24px_rgba(92,74,54,0.07)] transition-all disabled:opacity-50 disabled:hover:border-[#e6ded2] disabled:hover:shadow-none"
         >
           <FileJson size={32} className="text-indigo-500" />
           <div className="text-center">
@@ -41,7 +42,7 @@ export function ExportView() {
         <button
           onClick={handleExportMarkdown}
           disabled={threads.length === 0}
-          className="flex flex-col items-center gap-3 p-6 bg-white border border-gray-100 rounded-xl hover:border-indigo-200 hover:shadow-sm transition-all disabled:opacity-50 disabled:hover:border-gray-100 disabled:hover:shadow-none"
+          className="flex flex-col items-center gap-3 p-6 bg-[#fbf9f6] border border-[#e6ded2] rounded-2xl hover:border-[#8f89ca] hover:shadow-[0_8px_24px_rgba(92,74,54,0.07)] transition-all disabled:opacity-50 disabled:hover:border-[#e6ded2] disabled:hover:shadow-none"
         >
           <FileText size={32} className="text-emerald-500" />
           <div className="text-center">
@@ -51,7 +52,7 @@ export function ExportView() {
         </button>
       </div>
 
-      <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
+      <div className="bg-[#fff2df] rounded-2xl p-4 border border-[#f0d8bd]">
         <div className="flex items-center gap-2 mb-2">
           <Download size={16} className="text-gray-400" />
           <h4 className="text-sm font-medium text-gray-700">Export stats</h4>

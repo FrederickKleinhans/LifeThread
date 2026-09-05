@@ -15,25 +15,26 @@ export function StatsView() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">Your Progress</h2>
-        <p className="text-sm text-gray-500 mt-1">Track your journey and unlock achievements</p>
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#c66b4b] mb-2">A little momentum</p>
+        <h2 className="text-3xl font-bold text-[#27231f]">Your Progress</h2>
+        <p className="text-sm text-[#766e64] mt-2">Notice what’s taking shape, one small step at a time.</p>
       </div>
 
       {/* Level + XP card */}
-      <div className="bg-white rounded-xl border border-gray-100 p-6">
+      <div className="bg-[#302b68] text-white rounded-[2rem] border border-[#4a4387] p-6 shadow-[0_18px_45px_rgba(48,43,104,0.18)]">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <p className="text-sm text-gray-500">Level {stats.level}</p>
-            <h3 className="text-2xl font-bold text-gray-900">{stats.levelTitle}</h3>
+            <p className="text-sm text-white/60">Level {stats.level}</p>
+            <h3 className="text-2xl font-bold">{stats.levelTitle}</h3>
           </div>
           <div className="text-right">
-            <p className="text-2xl font-bold text-indigo-600">{stats.totalXP} XP</p>
-            <p className="text-xs text-gray-400">{stats.xpForNextLevel - stats.totalXP} XP to next level</p>
+            <p className="text-2xl font-bold text-[#f8c49e]">{stats.totalXP} XP</p>
+            <p className="text-xs text-white/60">{stats.xpForNextLevel - stats.totalXP} XP to next level</p>
           </div>
         </div>
-        <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
+        <div className="w-full h-3 bg-white/15 rounded-full overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full transition-all duration-500"
+            className="h-full bg-gradient-to-r from-[#f0a36d] to-[#f8c49e] rounded-full transition-all duration-500"
             style={{ width: `${stats.progressPercent}%` }}
           />
         </div>

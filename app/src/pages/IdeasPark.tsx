@@ -13,20 +13,21 @@ export function IdeasPark() {
   }, [threads]);
 
   return (
-    <div className="space-y-6 bg-amber-50/30 -m-4 md:-m-6 p-4 md:p-6 rounded-xl min-h-full">
+    <div className="space-y-6 bg-[#fff2df] -m-4 md:-m-6 p-4 md:p-6 rounded-[2rem] min-h-full">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">Ideas Park</h2>
-        <p className="text-sm text-gray-500 mt-1">
-          A low-pressure space for not-yet-tasks. No deadlines, no urgency.
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#c66b4b] mb-2">Let it wander</p>
+        <h2 className="text-3xl font-bold text-[#27231f]">Ideas Park</h2>
+        <p className="text-sm text-[#766e64] mt-2">
+          A playful space for thoughts before they become plans.
         </p>
       </div>
 
       {ideas.length === 0 ? (
         <div className="text-center py-16">
           <Lightbulb size={48} className="mx-auto text-gray-300 mb-4" />
-          <h3 className="text-lg font-medium text-gray-500">No ideas yet</h3>
-          <p className="text-sm text-gray-400 mt-1">
-            Create a thread with the "Ideas" folder to park something here.
+          <h3 className="text-lg font-semibold text-[#4b443c]">Give an idea somewhere to land</h3>
+          <p className="text-sm text-[#8d8378] mt-1">
+            Create a thread with the “Ideas” folder and let it take shape.
           </p>
         </div>
       ) : (

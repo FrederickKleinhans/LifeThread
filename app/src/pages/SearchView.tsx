@@ -4,9 +4,9 @@ import { EntryCard } from '../components/EntryCard';
 import { StatusBadge } from '../components/StatusBadge';
 import { useStatus } from '../hooks/useStatus';
 import { Search } from 'lucide-react';
-import type { Thread } from '../types';
+import type { Entry, Thread } from '../types';
 
-function ThreadResult({ thread, matchingEntries, navigate }: { thread: Thread; matchingEntries: any[]; navigate: (path: string) => void }) {
+function ThreadResult({ thread, matchingEntries, navigate }: { thread: Thread; matchingEntries: Entry[]; navigate: (path: string) => void }) {
   const { status, dormant } = useStatus(thread);
 
   return (
@@ -39,8 +39,9 @@ export function SearchView() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">Search</h2>
-        <p className="text-sm text-gray-500 mt-1">Find threads, entries, and tags</p>
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#c66b4b] mb-2">Find your way back</p>
+        <h2 className="text-3xl font-bold text-[#27231f]">Search</h2>
+        <p className="text-sm text-[#766e64] mt-2">Look through the moments, ideas, and threads you’ve collected.</p>
       </div>
 
       <input

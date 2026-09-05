@@ -11,6 +11,7 @@ export function QuickCapture() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showNewThreadModal, setShowNewThreadModal] = useState(false);
   const [threadFilter, setThreadFilter] = useState('');
+  const [pendingCapture, setPendingCapture] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const threads = useThreadStore((s) => s.threads);
   const addEntry = useThreadStore((s) => s.addEntry);
@@ -55,6 +56,10 @@ export function QuickCapture() {
   };
 
   const handleNewThread = () => {
+    const capture = input.trim();
+    if (!capture) return;
+    setPendingCapture(capture);
+    setInput('');
     setShowDropdown(false);
     setShowNewThreadModal(true);
   };
@@ -62,22 +67,21 @@ export function QuickCapture() {
   return (
     <>
       <div className="relative">
-        <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-3 shadow-sm focus-within:ring-2 focus-within:ring-indigo-200 focus-within:border-indigo-300 transition-all">
-          <Plus size={18} className="text-gray-400 flex-shrink-0" />
+        <div className="flex items-center gap-2 bg-[#fbf9f6] border border-[#d8cdbf] rounded-2xl px-4 py-3.5 shadow-[0_6px_20px_rgba(92,74,54,0.06)] focus-within:ring-2 focus-within:ring-[#d9d5f3] focus-within:border-[#8f89ca] transition-all">
           <input
             ref={inputRef}
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Capture something... press Enter to add"
-            className="flex-1 text-sm outline-none placeholder-gray-400 bg-transparent"
+            placeholder="Capture a moment, thought, or idea..."
+            className="flex-1 bg-transparent text-sm !text-[#27231f] caret-[#4f46a5] outline-none placeholder:text-[#9a9186]"
             aria-label="Quick capture input"
           />
           <button
             onClick={handleSubmit}
             disabled={!input.trim()}
-            className="text-indigo-500 hover:text-indigo-700 disabled:text-gray-300 transition-colors"
+            className="text-[#4f46a5] hover:text-[#40388f] disabled:text-[#c9c0b5] transition-colors"
             aria-label="Submit capture"
           >
             <Send size={18} />
@@ -94,7 +98,7 @@ export function QuickCapture() {
                   value={threadFilter}
                   onChange={(e) => setThreadFilter(e.target.value)}
                   placeholder="Search threads..."
-                  className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                  className="w-full rounded-lg border border-gray-200 px-3 py-1.5 text-xs !text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-200"
                   autoFocus
                 />
               </div>
@@ -121,10 +125,12 @@ export function QuickCapture() {
             <div className="border-t border-gray-100">
               <button
                 onClick={handleNewThread}
-                className="w-full text-left px-4 py-2.5 text-sm text-indigo-600 font-medium hover:bg-indigo-50 transition-colors flex items-center gap-2"
+                className="w-full text-left px-4 py-3 text-sm text-[#4f46a5] font-semibold hover:bg-[#ebe9f8] transition-colors flex items-center gap-2"
               >
-                <Plus size={14} />
-                Create new thread
+                <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-[#f8e3d5] text-[#c66b4b]">
+                  <Plus size={14} />
+                </span>
+                Create a new thread
               </button>
             </div>
           </div>
@@ -133,12 +139,20 @@ export function QuickCapture() {
 
       {showNewThreadModal && (
         <NewThreadModal
-          initialTitle={input}
-          onClose={() => setShowNewThreadModal(false)}
+          key={pendingCapture}
+          initialTitle={pendingCapture}
+          onClose={() => {
+            setShowNewThreadModal(false);
+            setPendingCapture('');
+          }}
           onCreate={async (title, folder, subfolder, tags) => {
-            const thread = await createThread(title, folder, subfolder, tags);
-            await addEntry(thread.id, 'log', input.trim());
+            const capturedTitle = pendingCapture.trim();
+            const threadTitle = title.trim() || capturedTitle;
+            if (!threadTitle) return;
+            const thread = await createThread(threadTitle, folder, subfolder, tags);
+            await addEntry(thread.id, 'log', capturedTitle || threadTitle);
             setInput('');
+            setPendingCapture('');
             setShowNewThreadModal(false);
             navigate(`/thread/${thread.id}`);
           }}

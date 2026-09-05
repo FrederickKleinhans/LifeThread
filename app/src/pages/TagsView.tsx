@@ -21,8 +21,9 @@ export function TagsView() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">Tags</h2>
-        <p className="text-sm text-gray-500 mt-1">Browse threads by tag</p>
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#c66b4b] mb-2">Your threads, in color</p>
+        <h2 className="text-3xl font-bold text-[#27231f]">Tags</h2>
+        <p className="text-sm text-[#766e64] mt-2">Follow the themes that keep showing up.</p>
       </div>
 
       {tagCounts.length === 0 ? (

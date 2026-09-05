@@ -34,16 +34,17 @@ export function ArchiveView() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">Archive</h2>
-        <p className="text-sm text-gray-500 mt-1">Completed, archived, and abandoned threads</p>
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#c66b4b] mb-2">A look back</p>
+        <h2 className="text-3xl font-bold text-[#27231f]">Archive</h2>
+        <p className="text-sm text-[#766e64] mt-2">Finished chapters and things you’ve set aside.</p>
       </div>
 
       {archivedThreads.length === 0 ? (
         <div className="text-center py-16">
           <Archive size={48} className="mx-auto text-gray-300 mb-4" />
-          <h3 className="text-lg font-medium text-gray-500">Archive is empty</h3>
-          <p className="text-sm text-gray-400 mt-1">
-            Completed and archived threads will appear here.
+          <h3 className="text-lg font-semibold text-[#4b443c]">Nothing tucked away yet</h3>
+          <p className="text-sm text-[#8d8378] mt-1">
+            Finished threads will appear here when you’re ready to set them aside.
           </p>
         </div>
       ) : (

@@ -61,9 +61,13 @@ export function OpenThreads() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900">Open Threads</h2>
-        <p className="text-sm text-gray-500 mt-1">All active work, grouped by folder</p>
+      <div className="relative overflow-hidden rounded-[2rem] bg-[#302b68] px-5 py-7 text-white shadow-[0_18px_45px_rgba(48,43,104,0.16)] sm:px-8">
+        <div className="absolute -right-14 -top-16 h-44 w-44 rounded-full bg-[#f0a36d]/60 blur-3xl" />
+        <div className="relative">
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#f8c49e] mb-2">In motion</p>
+        <h2 className="text-3xl font-bold text-white">Open Threads</h2>
+        <p className="text-sm text-white/70 mt-2">The things you’re exploring, building, and tending to.</p>
+        </div>
       </div>
 
       {/* Filters */}
@@ -87,8 +91,8 @@ export function OpenThreads() {
             onClick={() => setStatusFilter('ALL')}
             className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
               statusFilter === 'ALL'
-                ? 'bg-indigo-100 text-indigo-700'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                ? 'bg-[#ebe9f8] text-[#4f46a5]'
+                : 'bg-[#eee7dc] text-[#766e64] hover:bg-[#e4dbcf]'
             }`}
           >
             All
@@ -99,8 +103,8 @@ export function OpenThreads() {
               onClick={() => setStatusFilter(s)}
               className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
                 statusFilter === s
-                  ? 'bg-indigo-100 text-indigo-700'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  ? 'bg-[#ebe9f8] text-[#4f46a5]'
+                  : 'bg-[#eee7dc] text-[#766e64] hover:bg-[#e4dbcf]'
               }`}
             >
               {s}
@@ -112,7 +116,7 @@ export function OpenThreads() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Filter threads..."
-          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-200"
+          className="w-full border border-[#d8cdbf] bg-[#fbf9f6] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#d9d5f3] focus:border-[#8f89ca]"
         />
       </div>
 
@@ -120,9 +124,9 @@ export function OpenThreads() {
       {openThreads.length === 0 ? (
         <div className="text-center py-16">
           <ListTodo size={48} className="mx-auto text-gray-300 mb-4" />
-          <h3 className="text-lg font-medium text-gray-500">No open threads</h3>
-          <p className="text-sm text-gray-400 mt-1">
-            Create a thread from the Daily Feed to get started.
+          <h3 className="text-lg font-semibold text-[#4b443c]">Nothing in motion yet</h3>
+          <p className="text-sm text-[#8d8378] mt-1">
+            Start a thread when something deserves your attention.
           </p>
         </div>
       ) : (
@@ -132,7 +136,8 @@ export function OpenThreads() {
             if (items.length === 0) return null;
             return (
               <div key={folder}>
-                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                <h3 className="flex items-center gap-2 text-xs font-bold text-[#c66b4b] uppercase tracking-[0.2em] mb-3">
+                  <span className="h-px w-6 bg-[#e0b39d]" />
                   {folder}
                 </h3>
                 <div className="space-y-2">

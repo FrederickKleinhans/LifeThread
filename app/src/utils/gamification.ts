@@ -101,15 +101,13 @@ export function calculateStreak(entries: Entry[]): { current: number; longest: n
 
   // Calculate current streak (from today going backwards)
   let currentStreak = 0;
-  let checkDate = new Date();
-
   // Allow for today or yesterday to count as the start
   const mostRecent = sortedDays[0];
   const daysSinceLastEntry = differenceInCalendarDays(new Date(), new Date(mostRecent));
   if (daysSinceLastEntry > 1) {
     currentStreak = 0;
   } else {
-    checkDate = new Date(mostRecent);
+    let checkDate = new Date(mostRecent);
     for (let i = 0; i < 365; i++) {
       const dayStr = format(startOfDay(checkDate), 'yyyy-MM-dd');
       if (days.has(dayStr)) {
@@ -170,7 +168,7 @@ export function evaluateAchievements(threads: Thread[], entries: Entry[]): Achie
   const completedCount = entries.filter((e) => e.type === 'completed').length;
   const decisionCount = entries.filter((e) => e.type === 'decision').length;
   const milestoneCount = entries.filter((e) => e.type === 'milestone').length;
-  const { current: _streak, longest } = calculateStreak(entries);
+  const { longest } = calculateStreak(entries);
   const totalXP = calculateXP(threads, entries);
 
   const achievements: Achievement[] = [

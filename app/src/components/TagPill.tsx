@@ -11,7 +11,7 @@ interface TagPillProps {
 export function TagPill({ name, color, removable, onRemove, onClick }: TagPillProps) {
   return (
     <span
-      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 cursor-pointer hover:bg-gray-200 transition-colors"
+      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#ebe9f8] text-[#4f46a5] cursor-pointer hover:bg-[#dedcf3] transition-colors"
       style={color ? { backgroundColor: `${color}20`, color } : undefined}
       onClick={onClick}
     >

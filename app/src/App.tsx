@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
+import { MotionConfig } from 'framer-motion';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import type { Session } from '@supabase/supabase-js';
 import { Layout } from './components/Layout';
@@ -90,10 +91,11 @@ export default function App() {
 
   return (
     <AppErrorBoundary>
-    <BrowserRouter>
-      <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-[#f7f3ed] text-sm text-[#766e64]">Loading LifeThread...</div>}>
-        <Routes>
-          <Route element={<Layout />}>
+    <MotionConfig reducedMotion="user">
+      <BrowserRouter>
+        <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-[#f7f3ed] text-sm text-[#766e64]">Loading LifeThread...</div>}>
+          <Routes>
+            <Route element={<Layout />}>
           <Route path="/" element={<DailyFeed />} />
           <Route path="/threads" element={<OpenThreads />} />
           <Route path="/ideas" element={<IdeasPark />} />
@@ -104,10 +106,11 @@ export default function App() {
           <Route path="/stats" element={<StatsView />} />
           <Route path="/export" element={<ExportView />} />
           <Route path="/settings" element={<Settings />} />
-            </Route>
-          </Routes>
-        </Suspense>
-      </BrowserRouter>
+              </Route>
+            </Routes>
+          </Suspense>
+        </BrowserRouter>
+      </MotionConfig>
     </AppErrorBoundary>
   );
 }

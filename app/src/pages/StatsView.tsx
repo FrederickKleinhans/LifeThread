@@ -1,7 +1,10 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { animate, motion, useMotionValue, useTransform } from 'framer-motion';
 import { useThreadStore } from '../stores/threadStore';
 import { getFullStats } from '../utils/gamification';
 import { Flame, Trophy, Zap, Target, TrendingUp } from 'lucide-react';
+
+const STREAK_MILESTONES = [7, 30, 100];
 
 export function StatsView() {
   const threads = useThreadStore((s) => s.threads);
@@ -10,6 +13,20 @@ export function StatsView() {
   const stats = useMemo(() => getFullStats(threads, entries), [threads, entries]);
 
   const unlockedCount = stats.achievements.filter((a) => a.unlocked).length;
+  const previousStreak = useRef(stats.currentStreak);
+  const [celebrating, setCelebrating] = useState(false);
+  const celebratedMilestones = useRef(new Set<number>());
+
+  useEffect(() => {
+    const milestone = STREAK_MILESTONES.find((value) => stats.currentStreak >= value && previousStreak.current < value && !celebratedMilestones.current.has(value));
+    previousStreak.current = stats.currentStreak;
+    if (milestone && !celebratedMilestones.current.has(milestone)) {
+      celebratedMilestones.current.add(milestone);
+      setCelebrating(true);
+      const timeout = window.setTimeout(() => setCelebrating(false), 1200);
+      return () => window.clearTimeout(timeout);
+    }
+  }, [stats.currentStreak]);
 
   return (
     <div className="space-y-8">
@@ -28,7 +45,7 @@ export function StatsView() {
             <h3 className="text-2xl font-bold">{stats.levelTitle}</h3>
           </div>
           <div className="text-right">
-            <p className="text-2xl font-bold text-[#f8c49e]">{stats.totalXP} XP</p>
+            <p className="text-2xl font-bold text-[#f8c49e]"><AnimatedNumber value={stats.totalXP} /> XP</p>
             <p className="text-xs text-white/60">{stats.xpForNextLevel - stats.totalXP} XP to next level</p>
           </div>
         </div>
@@ -51,6 +68,13 @@ export function StatsView() {
         <StatCard icon={<Target size={20} className="text-indigo-500" />} value={stats.totalThreads} label="Threads" />
         <StatCard icon={<Zap size={20} className="text-amber-500" />} value={stats.totalEntries} label="Entries" />
       </div>
+      {celebrating && (
+        <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden" aria-hidden="true">
+          {Array.from({ length: 18 }, (_, index) => (
+            <span key={index} className="confetti-piece" style={{ left: `${8 + index * 5}%`, animationDelay: `${index * 18}ms`, backgroundColor: ['#f0a36d', '#4f46a5', '#c66b4b', '#f8c49e'][index % 4] }} />
+          ))}
+        </div>
+      )}
 
       {/* Weekly XP chart */}
       <div className="bg-white rounded-xl border border-gray-100 p-6">
@@ -123,9 +147,19 @@ function StatCard({ icon, value, label }: { icon: React.ReactNode; value: number
     <div className="bg-white rounded-xl border border-gray-100 p-4 flex items-center gap-3">
       <div className="flex-shrink-0">{icon}</div>
       <div>
-        <p className="text-xl font-bold text-gray-900">{value}</p>
+        <p className="text-xl font-bold text-gray-900"><AnimatedNumber value={value} /></p>
         <p className="text-xs text-gray-400">{label}</p>
       </div>
     </div>
   );
+}
+
+function AnimatedNumber({ value }: { value: number }) {
+  const motionValue = useMotionValue(value);
+  const rounded = useTransform(motionValue, (latest) => Math.round(latest));
+  useEffect(() => {
+    const controls = animate(motionValue, value, { duration: 0.6, ease: 'easeOut' });
+    return controls.stop;
+  }, [motionValue, value]);
+  return <motion.span>{rounded}</motion.span>;
 }

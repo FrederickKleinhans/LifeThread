@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useThreadStore } from '../stores/threadStore';
 import { inferStatus, isDormant } from '../utils/statusInference';
@@ -37,6 +38,14 @@ export function ThreadDetail() {
     if (!thread) return { status: 'INBOX' as const, dormant: false };
     return { status: inferStatus(thread, entries), dormant: isDormant(thread, entries) };
   }, [thread, entries]);
+  const timelineIds = useRef<Set<string> | null>(null);
+  const currentIds = new Set(entries.map((entry) => entry.id));
+  const newEntryIds = timelineIds.current
+    ? new Set(entries.filter((entry) => !timelineIds.current?.has(entry.id)).map((entry) => entry.id))
+    : new Set<string>();
+  useEffect(() => {
+    timelineIds.current = currentIds;
+  }, [entries]);
 
   if (!thread) {
     return (
@@ -247,20 +256,21 @@ export function ThreadDetail() {
           <p className="text-sm text-[#8d8378] text-center py-8 rounded-2xl border border-dashed border-[#d8cdbf]">No entries yet. Add a moment above.</p>
         ) : (
           <div className="relative">
-            <div className="absolute left-4 top-0 bottom-0 w-px bg-[#d8cdbf]" />
+            <motion.div initial={{ scaleY: 0 }} animate={{ scaleY: 1 }} transition={{ duration: 0.5 }} style={{ transformOrigin: 'top' }} className="absolute left-4 top-0 bottom-0 w-px bg-[#d8cdbf]" />
             <div className="space-y-3">
-              {entries.map((entry) => (
-                <div key={entry.id} className="relative flex gap-4 pl-8">
-                  <div
-                    className="absolute left-2.5 top-3 w-3 h-3 rounded-full border-2 border-white"
-                    style={{ backgroundColor: getEntryTypeColor(entry.type) }}
-                  />
+              {entries.map((entry, index) => {
+                const isBlocked = entry.type === 'blocker' && status === 'BLOCKED';
+                const isMilestone = entry.type === 'milestone';
+                return (
+                <motion.div key={entry.id} layout initial={timelineIds.current === null || newEntryIds.has(entry.id) ? { opacity: 0, y: 8 } : false} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25, delay: newEntryIds.has(entry.id) ? 0 : index * 0.06, ease: 'easeOut' }} className={`relative flex gap-4 pl-8 ${isMilestone ? 'motion-milestone' : ''}`}>
+                  <div className={`absolute left-2.5 top-3 w-3 h-3 rounded-full border-2 border-white ${isBlocked ? 'blocker-indicator' : ''}`} style={{ backgroundColor: getEntryTypeColor(entry.type) }} />
                   <div className="flex-1 bg-[#fbf9f6] rounded-2xl border border-[#e6ded2] p-4 shadow-[0_6px_18px_rgba(92,74,54,0.05)]">
                     <div className="flex items-center gap-2 mb-1">
                       <span
                         className="text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full text-white"
                         style={{ backgroundColor: getEntryTypeColor(entry.type) }}
                       >
+                        {entry.type === 'completed' && <CheckmarkDraw />}
                         {entry.type}
                       </span>
                       <span className="text-xs text-[#9a9186]">{relativeTime(entry.created_at)}</span>
@@ -305,12 +315,21 @@ export function ThreadDetail() {
                       <p className="text-sm leading-6 text-[#5f574e] whitespace-pre-wrap">{entry.body}</p>
                     )}
                   </div>
-                </div>
-              ))}
+                </motion.div>
+                );
+              })}
             </div>
           </div>
         )}
       </div>
     </div>
+  );
+}
+
+function CheckmarkDraw() {
+  return (
+    <svg className="mr-0.5 inline-block h-3 w-3" viewBox="0 0 12 12" aria-hidden="true">
+      <path className="checkmark-draw" d="M2 6.5 5 9l5-6" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
   );
 }

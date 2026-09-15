@@ -3,6 +3,7 @@ import { useThreadStore } from '../stores/threadStore';
 import { ThreadListItem } from '../components/ThreadListItem';
 import { monthYear } from '../utils/dateFormat';
 import { Archive } from 'lucide-react';
+import { sessionCopy } from '../utils/sessionCopy';
 
 export function ArchiveView() {
   const threads = useThreadStore((s) => s.threads);
@@ -41,10 +42,10 @@ export function ArchiveView() {
 
       {archivedThreads.length === 0 ? (
         <div className="text-center py-16">
-          <Archive size={48} className="mx-auto text-gray-300 mb-4" />
+          <Archive size={48} className="empty-state-icon mx-auto mb-4 text-[#c66b4b]" />
           <h3 className="text-lg font-semibold text-[#4b443c]">Nothing tucked away yet</h3>
           <p className="text-sm text-[#8d8378] mt-1">
-            Finished threads will appear here when you’re ready to set them aside.
+            {sessionCopy('archive')}
           </p>
         </div>
       ) : (

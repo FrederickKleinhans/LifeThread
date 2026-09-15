@@ -5,6 +5,7 @@ import { ThreadListItem } from '../components/ThreadListItem';
 import { inferStatus } from '../utils/statusInference';
 import type { ThreadStatus, Folder } from '../types';
 import { ListTodo, X } from 'lucide-react';
+import { sessionCopy } from '../utils/sessionCopy';
 
 const STATUS_FILTERS: ThreadStatus[] = ['ACTIVE', 'WAITING', 'BLOCKED', 'INBOX'];
 
@@ -123,10 +124,10 @@ export function OpenThreads() {
       {/* Thread groups */}
       {openThreads.length === 0 ? (
         <div className="text-center py-16">
-          <ListTodo size={48} className="mx-auto text-gray-300 mb-4" />
+          <ListTodo size={48} className="empty-state-icon mx-auto mb-4 text-[#c66b4b]" />
           <h3 className="text-lg font-semibold text-[#4b443c]">Nothing in motion yet</h3>
           <p className="text-sm text-[#8d8378] mt-1">
-            Start a thread when something deserves your attention.
+            {sessionCopy('threads')}
           </p>
         </div>
       ) : (

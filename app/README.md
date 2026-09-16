@@ -10,6 +10,7 @@ The app is a Vite + React + TypeScript application with:
 
 - A responsive, card-based journal interface
 - Daily Feed, Open Threads, Ideas Park, Archive, Tags, Search, Progress, and Export views
+- Bottom navigation for Open Threads, Ideas Park, Search, and Progress, with a More sheet for the remaining destinations and account actions
 - Quick capture with add-to-thread and create-new-thread flows
 - Inline thread title editing
 - Thread detail pages with entry creation and editing
@@ -23,6 +24,8 @@ The app is a Vite + React + TypeScript application with:
 - Durable offline mutation queue with reconnect replay
 - Online/offline status and visible sync errors
 - Focus/visibility reconciliation for multi-tab changes
+- Daily Feed entries are limited to active threads; archived threads, abandoned
+  threads, and threads in the Archive folder are excluded
 - Route-level code splitting
 - SPA deployment fallbacks for Vercel and Netlify
 - Runtime error boundary for basic production diagnostics
@@ -110,6 +113,8 @@ GitHub Actions validates `npm run lint` and `npm run build` for pushes to
 - Configured browser sessions to persist until explicit sign-out
 - Added offline queueing and replay for journal/profile mutations
 - Added multi-tab refresh/reconciliation and sync error visibility
+- Added bottom navigation and grouped secondary destinations under More
+- Filtered Daily Feed and its recent-entry fallback to active threads only
 - Added runtime error boundary, route-level code splitting, and SPA deployment fallbacks
 
 ## Outstanding

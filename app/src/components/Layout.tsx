@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   Newspaper,
   ListTodo,
@@ -39,6 +39,7 @@ export function Layout() {
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
   const [showNewThread, setShowNewThread] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { createThread, addEntry } = useThreadStore();
   const syncError = useThreadStore((state) => state.syncError);
   const loadAll = useThreadStore((state) => state.loadAll);
@@ -52,24 +53,70 @@ export function Layout() {
   }, [loadAll]);
 
   return (
-    <div className="flex min-h-screen overflow-x-hidden bg-[#f7f3ed]">
+    <div className="canvas-bg flex min-h-screen overflow-x-hidden">
+      <aside className="hidden w-64 flex-shrink-0 flex-col border-r-[3px] border-[var(--border)] bg-[var(--cobalt)] p-4 text-white md:flex">
+        <div className="mb-8 px-3 pt-3 text-xl font-bold">
+          Life<span className="text-[var(--butter)]">Thread</span>
+        </div>
+        <nav className="flex flex-1 flex-col gap-1" aria-label="Main navigation">
+          {navItems.map(({ to, icon: Icon, label }) => (
+            <NavLink
+              key={to}
+              to={to}
+              className={({ isActive }) =>
+                `physical sb-link flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold ${
+                  isActive
+                    ? 'border-2 border-[var(--border)] bg-white text-[var(--plum)] shadow-[4px_4px_0_var(--border)]'
+                    : 'text-white/85 hover:bg-white/15 hover:text-white'
+                }`
+              }
+            >
+              <Icon size={18} />
+              {label}
+            </NavLink>
+          ))}
+        </nav>
+        <div className="border-t-2 border-white/25 pt-3">
+          <button
+            onClick={() => setShowNewThread(true)}
+            className="physical flex w-full items-center justify-center gap-2 rounded-xl border-2 border-[var(--border)] bg-[var(--butter)] px-3 py-3 text-sm font-bold text-[var(--plum)] shadow-[4px_4px_0_var(--border)]"
+          >
+            <Plus size={17} strokeWidth={2.5} />
+            New thread
+          </button>
+        </div>
+      </aside>
       {/* App header */}
-      <header className="fixed top-0 left-0 right-0 z-40 bg-[#f7f3ed]/95 backdrop-blur border-b border-[#e6ded2] px-4 py-3 safe-top">
-        <h1 className="text-lg font-bold text-[#27231f] tracking-tight">
-          Life<span className="text-[#4f46a5]">Thread</span>
-        </h1>
+      <header className="fixed top-0 left-0 right-0 z-40 border-b-2 border-[var(--border)] bg-[var(--lilac)]/95 px-4 py-3 backdrop-blur safe-top md:left-64">
+        <div className="mx-auto flex max-w-4xl items-center justify-between">
+          <h1 className="text-lg font-bold tracking-tight text-[var(--plum)]">
+            Life<span className="text-[var(--cobalt)]">Thread</span>
+          </h1>
+          <div className="flex items-center gap-2">
+            <span className="hidden text-xs font-semibold text-[var(--ink-muted)] sm:inline">
+              {location.pathname === '/' ? 'Daily Feed' : location.pathname === '/threads' ? 'Open Threads' : location.pathname.slice(1).replace('-', ' ')}
+            </span>
+            <button
+              onClick={() => setShowNewThread(true)}
+              className="physical flex h-8 w-8 items-center justify-center rounded-lg border-2 border-[var(--border)] bg-[var(--butter)] text-[var(--plum)] shadow-[2px_2px_0_var(--border)] md:hidden"
+              aria-label="Create new thread"
+            >
+              <Plus size={17} strokeWidth={2.5} />
+            </button>
+          </div>
+        </div>
       </header>
 
       {/* Main content */}
-      <main className="min-w-0 flex-1 bg-[#f7f3ed] pb-20 pt-16">
-        <div className="w-full max-w-4xl mx-auto p-4 sm:p-5 md:p-6">
+      <main className="min-w-0 flex-1 pb-20 pt-16">
+        <div className="page-wrap p-4 sm:p-5 md:p-6">
           <Outlet />
         </div>
       </main>
 
       {/* Mobile bottom navigation */}
       <nav
-        className="fixed bottom-0 left-0 right-0 z-40 border-t border-[#e6ded2] bg-[#fbf9f6]/95 px-2 py-2 backdrop-blur safe-bottom"
+        className="mobile-nav fixed bottom-0 left-0 right-0 z-40 px-2 py-2 safe-bottom md:hidden"
         aria-label="Mobile navigation"
       >
         <div className="mx-auto grid max-w-lg grid-cols-5 gap-1">
@@ -80,8 +127,8 @@ export function Layout() {
               className={({ isActive }) =>
                 `flex min-w-0 flex-col items-center gap-1 rounded-xl px-1 py-2 text-[10px] font-semibold transition-colors ${
                   isActive
-                    ? 'bg-[#ebe9f8] text-[#4f46a5]'
-                    : 'text-[#766e64] hover:bg-[#f1ece5] hover:text-[#4b443c]'
+                  ? 'border-2 border-[var(--border)] bg-[var(--butter)] text-[var(--plum)] shadow-[2px_2px_0_var(--border)]'
+                  : 'text-[var(--ink-muted)] hover:bg-[var(--lilac)] hover:text-[var(--plum)]'
                 }`
               }
             >
@@ -93,7 +140,7 @@ export function Layout() {
           ))}
           <button
             onClick={() => setMoreMenuOpen(true)}
-            className="flex min-w-0 flex-col items-center gap-1 rounded-xl px-1 py-2 text-[10px] font-semibold text-[#766e64] transition-colors hover:bg-[#f1ece5] hover:text-[#4b443c]"
+            className="flex min-w-0 flex-col items-center gap-1 rounded-xl px-1 py-2 text-[10px] font-semibold text-[var(--ink-muted)] transition-colors hover:bg-[var(--lilac)] hover:text-[var(--plum)]"
             aria-label="Open more navigation options"
           >
             <MoreHorizontal size={18} />
@@ -164,7 +211,7 @@ export function Layout() {
       {/* Floating Action Button (mobile) */}
       <button
         onClick={() => setShowNewThread(true)}
-        className="fixed bottom-20 right-4 z-40 w-14 h-14 bg-gradient-to-br from-[#4f46a5] to-[#756bd2] text-white rounded-2xl shadow-[0_10px_24px_rgba(79,70,165,0.3)] hover:scale-105 transition-all flex items-center justify-center md:hidden safe-bottom"
+        className="physical fixed bottom-24 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-2xl border-2 border-[var(--border)] bg-[var(--coral)] text-[var(--plum)] shadow-[4px_4px_0_var(--border)] md:hidden safe-bottom"
         aria-label="Create new thread"
       >
         <Plus size={24} />

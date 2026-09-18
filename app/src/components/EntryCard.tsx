@@ -22,6 +22,7 @@ export function EntryCard({
   showThread = true,
 }: EntryCardProps) {
   const color = getEntryTypeColor(entry.type);
+  const quietType = entry.type === 'log' || entry.type === 'note' || entry.type === 'attachment';
   const [editingThread, setEditingThread] = useState(false);
   const [titleInput, setTitleInput] = useState(threadTitle || '');
   const [savingTitle, setSavingTitle] = useState(false);
@@ -36,11 +37,11 @@ export function EntryCard({
   };
 
   return (
-    <div className="relative flex gap-3 p-4 rounded-2xl bg-[#fbf9f6] border border-[#e6ded2] hover:border-[#c9bbae] hover:shadow-[0_8px_24px_rgba(92,74,54,0.07)] transition-all animate-fade-in">
+    <div className="surface-card physical relative flex gap-3 bg-white p-4 animate-fade-in">
       <div className="flex-shrink-0 mt-0.5">
         <span
-          className="inline-flex items-center px-2 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wide text-white"
-          style={{ backgroundColor: color }}
+          className="entry-badge uppercase tracking-wide"
+          style={{ backgroundColor: color, color: quietType || entry.type === 'waiting' || entry.type === 'milestone' ? 'var(--plum)' : 'var(--white)' }}
         >
           {entry.type}
         </span>

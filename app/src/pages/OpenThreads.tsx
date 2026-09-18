@@ -62,12 +62,12 @@ export function OpenThreads() {
 
   return (
     <div className="space-y-6">
-      <div className="relative overflow-hidden rounded-[2rem] bg-[#302b68] px-5 py-7 text-white shadow-[0_18px_45px_rgba(48,43,104,0.16)] sm:px-8">
-        <div className="absolute -right-14 -top-16 h-44 w-44 rounded-full bg-[#f0a36d]/60 blur-3xl" />
+      <div className="large-panel relative overflow-hidden bg-[var(--cobalt)] px-5 py-7 text-white sm:px-8">
+        <div className="shape circ -right-8 -top-10 h-36 w-36 bg-[var(--butter)]" style={{ animation: 'bob 14s ease-in-out infinite' }} />
         <div className="relative">
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#f8c49e] mb-2">In motion</p>
-        <h2 className="text-3xl font-bold text-white">Open Threads</h2>
-        <p className="text-sm text-white/70 mt-2">The things you’re exploring, building, and tending to.</p>
+        <p className="eyebrow mb-2 text-[var(--butter)]">In motion</p>
+        <h2 className="text-4xl font-bold text-white">Open Threads</h2>
+        <p className="mt-2 max-w-md text-sm text-white/80">The things you’re exploring, building, and tending to.</p>
         </div>
       </div>
 

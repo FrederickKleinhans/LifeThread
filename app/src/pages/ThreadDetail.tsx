@@ -97,21 +97,19 @@ export function ThreadDetail() {
   };
 
   return (
-    <div className="space-y-7">
+    <div className="canvas-bg -m-4 min-h-screen space-y-7 p-4 sm:-m-5 sm:p-5 md:-m-6 md:p-6">
       {/* Back button */}
       <button
         onClick={() => navigate(-1)}
-        className="flex items-center gap-2 text-sm font-medium text-[#766e64] hover:text-[#4f46a5] transition-colors"
+        className="physical flex items-center gap-2 rounded-xl px-2 py-1 text-sm font-semibold text-[var(--ink-muted)] hover:text-[var(--cobalt)]"
       >
         <ArrowLeft size={16} />
         Back
       </button>
 
       {/* Header */}
-      <div className="relative overflow-hidden bg-[#302b68] text-white rounded-[2rem] border border-[#4a4387] p-5 sm:p-7 shadow-[0_18px_45px_rgba(48,43,104,0.18)]">
-        <div className="absolute -right-16 -top-20 h-52 w-52 rounded-full bg-[#f0a36d]/60 blur-3xl" />
-        <div className="absolute -bottom-20 left-1/3 h-48 w-48 rounded-full bg-[#796fe0]/40 blur-3xl" />
-        <div className="relative flex items-start justify-between gap-4">
+      <div className="surface-card bg-white p-5 sm:p-7">
+        <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
             {editingTitle ? (
               <div className="flex items-center gap-2">
@@ -120,22 +118,22 @@ export function ThreadDetail() {
                   value={titleInput}
                   onChange={(e) => setTitleInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleTitleSave()}
-                  className="text-xl font-bold border-b-2 border-[#f0a36d] outline-none bg-transparent text-white"
+                  className="text-xl font-bold border-b-2 border-[var(--cobalt)] outline-none bg-transparent text-[var(--plum)]"
                   autoFocus
                 />
-                <button onClick={handleTitleSave} className="text-indigo-600 hover:text-indigo-800">
+                <button onClick={handleTitleSave} className="text-[var(--cobalt)] hover:text-[var(--cobalt-deep)]">
                   <Check size={18} />
                 </button>
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">{thread.title}</h1>
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--plum)]">{thread.title}</h1>
                 <button
                   onClick={() => {
                     setTitleInput(thread.title);
                     setEditingTitle(true);
                   }}
-                  className="text-white/50 hover:text-white"
+                  className="text-[var(--ink-muted)] hover:text-[var(--cobalt)]"
                   aria-label="Edit title"
                 >
                   <Pencil size={14} />
@@ -145,7 +143,7 @@ export function ThreadDetail() {
 
             <div className="flex items-center gap-3 mt-2">
               <StatusBadge status={status} dormant={dormant} />
-              <span className="text-sm text-white/65">
+              <span className="text-sm text-[var(--ink-muted)]">
                 {thread.folder}{thread.subfolder ? ` > ${thread.subfolder}` : ''}
               </span>
             </div>
@@ -173,7 +171,7 @@ export function ThreadDetail() {
                     }
                   }}
                   placeholder="+ add tag"
-                  className="w-24 text-xs border-b border-white/30 outline-none focus:border-[#f0a36d] bg-transparent text-white placeholder-white/50"
+                  className="w-24 border-b-2 border-[var(--border)] bg-transparent text-xs text-[var(--plum)] outline-none placeholder:text-[var(--ink-muted)] focus:border-[var(--cobalt)]"
                 />
               </div>
             </div>
@@ -184,7 +182,7 @@ export function ThreadDetail() {
             {thread.archived_at || thread.abandoned_at ? (
               <button
                 onClick={() => reviveThread(thread.id)}
-                className="flex items-center gap-1 px-3 py-2 text-xs font-semibold bg-[#e3f3e9] text-[#26734b] rounded-xl hover:bg-[#d1eadb] transition-colors"
+                className="physical flex items-center gap-1 rounded-xl border-2 border-[var(--border)] bg-[var(--mint)] px-3 py-2 text-xs font-bold text-[var(--plum)]"
               >
                 <RotateCcw size={14} />
                 Revive
@@ -193,14 +191,14 @@ export function ThreadDetail() {
               <>
                 <button
                   onClick={() => archiveThread(thread.id)}
-                  className="flex items-center gap-1 px-3 py-2 text-xs font-semibold bg-white/15 text-white rounded-xl hover:bg-white/25 transition-colors"
+                  className="physical flex items-center gap-1 rounded-xl border-2 border-[var(--border)] bg-[var(--cobalt)] px-3 py-2 text-xs font-bold text-white"
                 >
                   <Archive size={14} />
                   Archive
                 </button>
                 <button
                   onClick={() => abandonThread(thread.id)}
-                  className="flex items-center gap-1 px-3 py-2 text-xs font-semibold bg-[#fbe2df] text-[#a54842] rounded-xl hover:bg-[#f5d0cc] transition-colors"
+                  className="physical flex items-center gap-1 rounded-xl border-2 border-[var(--border)] bg-[var(--coral)] px-3 py-2 text-xs font-bold text-white"
                 >
                   <Trash2 size={14} />
                   Abandon
@@ -212,13 +210,13 @@ export function ThreadDetail() {
       </div>
 
       {/* Add Entry form */}
-      <div className="bg-[#fbf9f6] rounded-[1.5rem] border border-[#e6ded2] p-4 shadow-[0_8px_24px_rgba(92,74,54,0.06)]">
+      <div className="surface-card bg-white p-4">
         <div className="mb-3 flex items-center justify-between">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#c66b4b]">Add to the thread</p>
-            <p className="mt-1 text-xs text-[#9a9186]">Capture what happened, what changed, or what comes next.</p>
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--coral)]">Add to the thread</p>
+            <p className="mt-1 text-xs text-[var(--ink-muted)]">Capture what happened, what changed, or what comes next.</p>
           </div>
-          <span className="hidden rounded-full bg-[#ebe9f8] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-[#4f46a5] sm:inline-flex">New entry</span>
+          <span className="entry-badge hidden bg-[var(--butter)] text-[var(--plum)] uppercase sm:inline-flex">New entry</span>
         </div>
         <div className="grid gap-3 sm:grid-cols-[11rem_minmax(0,1fr)_auto] sm:items-stretch">
           <EntryTypeSelector value={newEntryType} onChange={setNewEntryType} />
@@ -233,14 +231,14 @@ export function ThreadDetail() {
                 }
               }}
               placeholder="Write a quick update..."
-              className="h-full min-h-20 w-full border border-[#d8cdbf] bg-white rounded-xl px-3 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#d9d5f3] focus:border-[#8f89ca]"
+              className="h-full min-h-20 w-full rounded-xl border-2 border-[var(--border)] bg-white px-3 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[var(--butter)]"
               rows={2}
             />
           </div>
           <button
             onClick={handleAddEntry}
             disabled={!newEntryBody.trim()}
-            className="flex min-h-12 w-full items-center justify-center gap-1 rounded-xl bg-[#4f46a5] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#40388f] disabled:bg-[#eee7dc] disabled:text-[#9a9186] sm:w-auto"
+            className="physical flex min-h-12 w-full items-center justify-center gap-1 rounded-xl border-2 border-[var(--border)] bg-[var(--cobalt)] px-4 py-2.5 text-sm font-bold text-white disabled:bg-white disabled:text-[var(--ink-muted)] sm:w-auto"
           >
             <Plus size={14} />
             Add update
@@ -251,24 +249,24 @@ export function ThreadDetail() {
 
       {/* Timeline */}
       <div className="space-y-1">
-        <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-[#c66b4b] mb-3">Timeline</h3>
+        <h3 className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-[var(--coral)]">Timeline</h3>
         {entries.length === 0 ? (
           <p className="text-sm text-[#8d8378] text-center py-8 rounded-2xl border border-dashed border-[#d8cdbf]">No entries yet. Add a moment above.</p>
         ) : (
           <div className="relative">
-            <motion.div initial={{ scaleY: 0 }} animate={{ scaleY: 1 }} transition={{ duration: 0.5 }} style={{ transformOrigin: 'top' }} className="absolute left-4 top-0 bottom-0 w-px bg-[#d8cdbf]" />
+            <motion.div initial={{ scaleY: 0 }} animate={{ scaleY: 1 }} transition={{ duration: 0.5 }} style={{ transformOrigin: 'top' }} className="absolute bottom-0 left-4 top-0 w-[3px] bg-[var(--border)]" />
             <div className="space-y-3">
               {entries.map((entry, index) => {
                 const isBlocked = entry.type === 'blocker' && status === 'BLOCKED';
                 const isMilestone = entry.type === 'milestone';
                 return (
                 <motion.div key={entry.id} layout initial={timelineIds.current === null || newEntryIds.has(entry.id) ? { opacity: 0, y: 8 } : false} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25, delay: newEntryIds.has(entry.id) ? 0 : index * 0.06, ease: 'easeOut' }} className={`relative flex gap-4 pl-8 ${isMilestone ? 'motion-milestone' : ''}`}>
-                  <div className={`absolute left-2.5 top-3 w-3 h-3 rounded-full border-2 border-white ${isBlocked ? 'blocker-indicator' : ''}`} style={{ backgroundColor: getEntryTypeColor(entry.type) }} />
-                  <div className="flex-1 bg-[#fbf9f6] rounded-2xl border border-[#e6ded2] p-4 shadow-[0_6px_18px_rgba(92,74,54,0.05)]">
+                  <div className={`absolute left-2 top-3 h-5 w-5 rounded-full border-[3px] border-[var(--border)] ${isBlocked ? 'blocker-indicator' : ''}`} style={{ backgroundColor: getEntryTypeColor(entry.type) }} />
+                  <div className="surface-card flex-1 bg-white p-4">
                     <div className="flex items-center gap-2 mb-1">
                       <span
-                        className="text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full text-white"
-                        style={{ backgroundColor: getEntryTypeColor(entry.type) }}
+                        className="entry-badge uppercase"
+                        style={{ backgroundColor: getEntryTypeColor(entry.type), color: entry.type === 'blocker' || entry.type === 'decision' ? 'var(--white)' : 'var(--plum)' }}
                       >
                         {entry.type === 'completed' && <CheckmarkDraw />}
                         {entry.type}

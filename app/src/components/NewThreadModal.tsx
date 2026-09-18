@@ -46,7 +46,7 @@ export function NewThreadModal({ initialTitle = '', onClose, onCreate }: NewThre
         role="dialog"
         aria-modal="true"
         aria-labelledby="new-thread-title"
-        className="bg-[#fbf9f6] rounded-[1.75rem] shadow-[0_24px_70px_rgba(32,27,59,0.25)] w-full max-w-md p-5 sm:p-7 my-auto max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-2rem)] overflow-y-auto border border-white/70"
+        className="large-panel w-full max-w-md bg-white p-5 sm:p-7 my-auto max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-2rem)] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-4 mb-6">
@@ -55,7 +55,7 @@ export function NewThreadModal({ initialTitle = '', onClose, onCreate }: NewThre
               <Sparkles size={16} />
               <span className="text-xs font-bold uppercase tracking-[0.18em]">Make room for it</span>
             </div>
-            <h2 id="new-thread-title" className="text-2xl font-bold text-[#27231f]">Create a new thread</h2>
+            <h2 id="new-thread-title" className="text-2xl font-bold text-[var(--plum)]">Create a new thread</h2>
             <p className="text-sm text-[#766e64] mt-1">Give something in your life a place to grow.</p>
           </div>
           <button

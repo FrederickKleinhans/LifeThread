@@ -17,7 +17,7 @@ export function EntryTypeSelector({ value, onChange }: EntryTypeSelectorProps) {
       <button
         type="button"
         onClick={() => setOpen((isOpen) => !isOpen)}
-        className={`flex h-full min-h-12 w-full items-center gap-2 rounded-xl border px-3 py-2.5 text-left transition-colors ${
+        className={`physical flex h-full min-h-12 w-full items-center gap-2 rounded-xl border-2 border-[var(--border)] px-3 py-2.5 text-left ${
           open
             ? 'border-[#8f89ca] bg-[#fffaf3] ring-2 ring-[#d9d5f3]'
             : 'border-[#d8cdbf] bg-[#fff2df] hover:border-[#b9aec2]'
@@ -26,7 +26,7 @@ export function EntryTypeSelector({ value, onChange }: EntryTypeSelectorProps) {
         aria-expanded={open}
         aria-label="Select entry type"
       >
-        <span className="h-2.5 w-2.5 flex-shrink-0 rounded-full" style={{ backgroundColor: selected.color }} />
+        <span className="entry-badge" style={{ backgroundColor: selected.color, color: selected.color === 'var(--coral)' || selected.color === 'var(--cobalt)' ? 'var(--white)' : 'var(--plum)' }}>{selected.label}</span>
         <span className="min-w-0 flex-1">
           <span className="block text-sm font-semibold text-[#766e64]">{selected.label}</span>
           <span className="block truncate text-[10px] text-[#9a9186]">{selected.description}</span>
@@ -35,7 +35,7 @@ export function EntryTypeSelector({ value, onChange }: EntryTypeSelectorProps) {
       </button>
       {open && (
         <div
-          className="absolute left-0 top-full z-30 mt-2 max-h-64 w-72 overflow-y-auto rounded-2xl border border-[#e6ded2] bg-[#fbf9f6] p-1.5 shadow-[0_16px_32px_rgba(92,74,54,0.16)]"
+          className="absolute left-0 top-full z-30 mt-2 max-h-64 w-72 overflow-y-auto rounded-2xl border-2 border-[var(--border)] bg-white p-1.5 shadow-[4px_4px_0_var(--border)]"
           role="listbox"
           aria-label="Choose an entry type"
         >
@@ -55,7 +55,7 @@ export function EntryTypeSelector({ value, onChange }: EntryTypeSelectorProps) {
                   isSelected ? 'bg-[#ebe9f8]' : 'hover:bg-[#f1ece5]'
                 }`}
               >
-                <span className="h-2.5 w-2.5 flex-shrink-0 rounded-full" style={{ backgroundColor: type.color }} />
+                <span className="entry-badge" style={{ backgroundColor: type.color, color: type.color === 'var(--coral)' || type.color === 'var(--cobalt)' ? 'var(--white)' : 'var(--plum)' }}>{type.label}</span>
                 <span className="min-w-0 flex-1">
                   <span className="block text-sm font-semibold text-[#4b443c]">{type.label}</span>
                   <span className="block truncate text-xs text-[#9a9186]">{type.description}</span>

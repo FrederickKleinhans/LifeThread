@@ -38,17 +38,32 @@ export function AuthPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f7f3ed] px-5 py-10 flex items-center justify-center">
-      <section className="w-full max-w-md">
-        <div className="mb-8">
-          <p className="text-sm font-semibold tracking-[0.18em] uppercase text-[#c66b4b]">Your place for what matters</p>
-          <h1 className="mt-3 text-4xl font-bold tracking-tight text-[#27231f]">
-            Life<span className="text-[#4f46a5]">Thread</span>
+    <main className="canvas-bg grid min-h-screen items-center gap-8 p-5 lg:grid-cols-2 lg:p-10">
+      <section className="relative mx-auto hidden min-h-[min(680px,calc(100vh-5rem))] w-full max-w-2xl overflow-hidden rounded-[20px] border-[3px] border-[var(--border)] bg-[var(--cobalt)] p-8 text-white shadow-[7px_7px_0_var(--border)] lg:flex lg:flex-col lg:justify-between">
+        <div className="shape circ -right-8 top-12 h-48 w-48 bg-[var(--butter)]" style={{ animation: 'bob 13s ease-in-out infinite' }} />
+        <div className="shape blobby bottom-12 right-24 h-36 w-52 bg-[var(--mint)]" style={{ animation: 'bob 16s ease-in-out infinite -4s' }} />
+        <div className="relative">
+          <p className="text-sm font-bold uppercase tracking-[0.18em] text-[var(--butter)]">Your place for what matters</p>
+          <h1 className="mt-5 text-6xl font-bold tracking-tight">
+            Life<span className="text-[var(--cobalt)]">Thread</span>
           </h1>
-          <p className="mt-3 text-[#766e64]">Keep your thoughts, plans, and progress connected to you.</p>
+          <p className="mt-4 max-w-md text-lg text-white/85">Keep your thoughts, plans, and progress connected to you.</p>
+        </div>
+        <div className="relative max-w-md rounded-2xl border-2 border-[var(--border)] bg-white p-5 text-[var(--plum)] shadow-[4px_4px_0_var(--border)]">
+          <p className="text-xs font-bold uppercase tracking-widest text-[var(--cobalt)]">A thread worth keeping</p>
+          <p className="mt-3 font-display text-2xl">“Small steps still count when they move you forward.”</p>
+        </div>
+      </section>
+      <section className="mx-auto w-full max-w-md">
+        <div className="mb-8">
+          <p className="text-sm font-semibold tracking-[0.18em] uppercase text-[var(--coral)]">Your place for what matters</p>
+          <h1 className="mt-3 text-4xl font-bold tracking-tight text-[var(--plum)]">
+            Life<span className="text-[var(--cobalt)]">Thread</span>
+          </h1>
+          <p className="mt-3 text-[var(--ink-muted)]">Keep your thoughts, plans, and progress connected to you.</p>
         </div>
 
-        <div className="rounded-3xl border border-[#e6ded2] bg-[#fbf9f6] p-6 shadow-[0_20px_60px_rgba(63,48,32,0.08)]">
+        <div className="large-panel bg-white p-6">
           <div className="flex gap-1 rounded-xl bg-[#eee7dc] p-1 mb-6">
             {(['sign-in', 'sign-up'] as const).map((value) => (
               <button
@@ -60,7 +75,7 @@ export function AuthPage() {
                   setMessage('');
                 }}
                 className={`flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${
-                  mode === value ? 'bg-white text-[#4f46a5] shadow-sm' : 'text-[#766e64]'
+                  mode === value ? 'bg-[var(--butter)] text-[var(--plum)] shadow-[2px_2px_0_var(--border)]' : 'text-[var(--ink-muted)]'
                 }`}
               >
                 {value === 'sign-in' ? 'Sign in' : 'Create account'}

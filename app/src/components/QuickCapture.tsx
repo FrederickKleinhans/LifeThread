@@ -67,7 +67,7 @@ export function QuickCapture() {
   return (
     <>
       <div className="relative">
-        <div className="flex items-center gap-2 bg-[#fbf9f6] border border-[#d8cdbf] rounded-2xl px-4 py-3.5 shadow-[0_6px_20px_rgba(92,74,54,0.06)] focus-within:ring-2 focus-within:ring-[#d9d5f3] focus-within:border-[#8f89ca] transition-all">
+        <div className="surface-card flex items-center gap-2 bg-white px-4 py-3.5 focus-within:ring-2 focus-within:ring-[var(--butter)]">
           <input
             ref={inputRef}
             type="text"
@@ -75,7 +75,7 @@ export function QuickCapture() {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Capture a moment, thought, or idea..."
-            className="flex-1 bg-transparent text-sm !text-[#27231f] caret-[#4f46a5] outline-none placeholder:text-[#9a9186]"
+            className="flex-1 bg-transparent text-sm !text-[var(--plum)] caret-[var(--cobalt)] outline-none placeholder:text-[var(--ink-muted)]"
             aria-label="Quick capture input"
           />
           <button

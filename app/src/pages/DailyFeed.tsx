@@ -40,14 +40,14 @@ export function DailyFeed() {
   const emptyCopy = sessionCopy('feed');
 
   return (
-    <div className="space-y-7">
-      <section className="relative z-20 isolate rounded-[2rem] bg-[#302b68] px-5 py-7 text-white shadow-[0_18px_45px_rgba(48,43,104,0.22)] sm:px-8 sm:py-9 md:z-40">
-        <div className="hero-ambient-one pointer-events-none absolute -right-12 -top-16 -z-10 h-48 w-48 rounded-full bg-[#f0a36d]/80 blur-2xl" />
-        <div className="hero-ambient-two pointer-events-none absolute -bottom-24 left-1/3 -z-10 h-56 w-56 rounded-full bg-[#796fe0]/70 blur-3xl" />
+    <div className="canvas-bg -m-4 min-h-screen space-y-7 p-4 sm:-m-5 sm:p-5 md:-m-6 md:p-6">
+      <section className="large-panel relative z-20 isolate overflow-hidden bg-[var(--cobalt)] px-5 py-7 text-white sm:px-8 sm:py-9 md:z-40">
+        <div className="shape circ right-10 top-8 h-28 w-28 bg-[var(--butter)]" style={{ animation: 'bob 13s ease-in-out infinite' }} />
+        <div className="shape pill bottom-8 right-24 h-8 w-32 bg-[var(--coral)]" style={{ animation: 'bob 15s ease-in-out infinite -3s' }} />
         <div className="relative max-w-xl">
           <div className="mb-7 flex items-center justify-between gap-4">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#f8c49e]">A place for what matters</p>
-            <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-white/80">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--butter)]">A place for what matters</p>
+            <span className="rounded-full border-2 border-[var(--border)] bg-white px-3 py-1 text-xs font-bold text-[var(--plum)]">
               {new Intl.DateTimeFormat('en', { weekday: 'short', month: 'short', day: 'numeric' }).format(new Date())}
             </span>
           </div>
@@ -57,9 +57,9 @@ export function DailyFeed() {
           <p className="mt-4 max-w-md text-sm leading-6 text-white/70">
             Capture the moments, ideas, and loose ends that have your attention.
           </p>
-          <div className="mt-7 rounded-2xl border border-white/15 bg-white/10 p-3 sm:p-4">
+          <div className="mt-7 rounded-2xl border-2 border-[var(--border)] bg-white/15 p-3 sm:p-4">
             <div className="mb-3 flex items-center gap-2 px-1">
-              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#f0a36d] text-[#302b68]" aria-hidden="true">✦</span>
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg border-2 border-[var(--border)] bg-[var(--butter)] text-[var(--plum)]" aria-hidden="true">✦</span>
               <div>
                 <p className="text-sm font-semibold text-white">Capture a moment</p>
                 <p className="text-xs text-white/60">A thought, a win, or whatever is on your mind.</p>
@@ -77,7 +77,7 @@ export function DailyFeed() {
       </div>
 
       {feedToShow.length === 0 ? (
-        <div className="text-center py-16 px-5 rounded-2xl border border-dashed border-[#d8cdbf] bg-[#fbf9f6]/70">
+        <div className="surface-card bg-white px-5 py-16 text-center">
           <Newspaper size={42} strokeWidth={1.5} className="empty-state-icon mx-auto mb-4 text-[#c66b4b]" />
           <h3 className="text-lg font-semibold text-[#4b443c]">Start with a moment</h3>
           <p className="text-sm text-[#8d8378] mt-1">

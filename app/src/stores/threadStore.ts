@@ -11,6 +11,7 @@ import {
   updateRemoteThread,
 } from '../lib/remoteRepository';
 import { enqueueMutation, replayMutations } from '../lib/mutationQueue';
+import { useNotifications } from './notifications';
 
 interface ThreadStore {
   threads: Thread[];
@@ -71,10 +72,12 @@ export const useThreadStore = create<ThreadStore>((set, get) => ({
         db.threads.toArray(), db.entries.toArray(), db.tags.toArray(),
       ]);
       if (!threads.length && !entries.length && !tags.length) throw error;
+      const message = error instanceof Error ? error.message : 'Unable to synchronise changes.';
       set({
         threads, entries, tags, loading: false,
-        syncError: error instanceof Error ? error.message : 'Unable to synchronise changes.',
+        syncError: message,
       });
+      useNotifications.getState().error('Sync issue', message, 5000);
     }
   },
 
@@ -92,10 +95,17 @@ export const useThreadStore = create<ThreadStore>((set, get) => ({
       abandoned_at: null,
     };
     try { await insertRemoteThread(thread); } catch (error) {
-      if (!navigator.onLine) await enqueueMutation({ kind: 'insertThread', value: thread }); else throw error;
+      if (!navigator.onLine) {
+        await enqueueMutation({ kind: 'insertThread', value: thread });
+        useNotifications.getState().success('Thread saved locally', 'It will sync once you are back online.', 4000);
+      } else {
+        useNotifications.getState().error('Could not create thread', error instanceof Error ? error.message : 'Please try again.', 5000);
+        throw error;
+      }
     }
     await db.threads.add(thread);
     set({ threads: [...get().threads, thread] });
+    useNotifications.getState().success('Thread alive', `You’ve made room for ${title}.`, 3000);
     return thread;
   },
 
@@ -166,10 +176,19 @@ export const useThreadStore = create<ThreadStore>((set, get) => ({
       created_at: now,
     };
     try { await insertRemoteEntry(entry); } catch (error) {
-      if (!navigator.onLine) await enqueueMutation({ kind: 'insertEntry', value: entry }); else throw error;
+      if (!navigator.onLine) {
+        await enqueueMutation({ kind: 'insertEntry', value: entry });
+        useNotifications.getState().success('Entry saved locally', 'It will sync when you are online.', 3500);
+      } else {
+        useNotifications.getState().error('Could not save entry', error instanceof Error ? error.message : 'Please try again.', 5000);
+        throw error;
+      }
     }
     try { await updateRemoteThread(threadId, { updated_at: now }); } catch (error) {
-      if (!navigator.onLine) await enqueueMutation({ kind: 'updateThread', value: { id: threadId, updates: { updated_at: now } } }); else throw error;
+      if (!navigator.onLine) await enqueueMutation({ kind: 'updateThread', value: { id: threadId, updates: { updated_at: now } } }); else {
+        useNotifications.getState().error('Could not update thread', error instanceof Error ? error.message : 'Please try again.', 5000);
+        throw error;
+      }
     }
     await db.entries.add(entry);
     await db.threads.update(threadId, { updated_at: now });
@@ -179,6 +198,7 @@ export const useThreadStore = create<ThreadStore>((set, get) => ({
         t.id === threadId ? { ...t, updated_at: now } : t
       ),
     });
+    useNotifications.getState().success('Worth threading', body.slice(0, 36) + (body.length > 36 ? '…' : ''), 2500);
     return entry;
   },
 

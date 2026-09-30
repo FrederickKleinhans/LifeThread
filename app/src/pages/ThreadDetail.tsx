@@ -38,13 +38,13 @@ export function ThreadDetail() {
     if (!thread) return { status: 'INBOX' as const, dormant: false };
     return { status: inferStatus(thread, entries), dormant: isDormant(thread, entries) };
   }, [thread, entries]);
-  const timelineIds = useRef<Set<string> | null>(null);
-  const currentIds = new Set(entries.map((entry) => entry.id));
-  const newEntryIds = timelineIds.current
-    ? new Set(entries.filter((entry) => !timelineIds.current?.has(entry.id)).map((entry) => entry.id))
-    : new Set<string>();
+  const previousEntryIdsRef = useRef<Set<string>>(new Set());
+  const [newEntryIds, setNewEntryIds] = useState<Set<string>>(new Set());
+
   useEffect(() => {
-    timelineIds.current = currentIds;
+    const currentIds = new Set(entries.map((entry) => entry.id));
+    setNewEntryIds(new Set([...currentIds].filter((entryId) => !previousEntryIdsRef.current.has(entryId))));
+    previousEntryIdsRef.current = currentIds;
   }, [entries]);
 
   if (!thread) {
@@ -108,17 +108,17 @@ export function ThreadDetail() {
       </button>
 
       {/* Header */}
-      <div className="surface-card bg-white p-5 sm:p-7">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex-1">
+      <div className="surface-card bg-white p-4 sm:p-7">
+        <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+          <div className="min-w-0 flex-1">
             {editingTitle ? (
-              <div className="flex items-center gap-2">
+              <div className="flex min-w-0 items-center gap-2">
                 <input
                   type="text"
                   value={titleInput}
                   onChange={(e) => setTitleInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleTitleSave()}
-                  className="text-xl font-bold border-b-2 border-[var(--cobalt)] outline-none bg-transparent text-[var(--plum)]"
+                  className="min-w-0 flex-1 text-xl font-bold border-b-2 border-[var(--cobalt)] outline-none bg-transparent text-[var(--plum)]"
                   autoFocus
                 />
                 <button onClick={handleTitleSave} className="text-[var(--cobalt)] hover:text-[var(--cobalt-deep)]">
@@ -126,14 +126,14 @@ export function ThreadDetail() {
                 </button>
               </div>
             ) : (
-              <div className="flex items-center gap-2">
-                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--plum)]">{thread.title}</h1>
+              <div className="flex min-w-0 items-start gap-2">
+                <h1 className="min-w-0 break-words [overflow-wrap:anywhere] text-2xl font-bold tracking-tight text-[var(--plum)] sm:text-3xl">{thread.title}</h1>
                 <button
                   onClick={() => {
                     setTitleInput(thread.title);
                     setEditingTitle(true);
                   }}
-                  className="text-[var(--ink-muted)] hover:text-[var(--cobalt)]"
+                  className="mt-1 shrink-0 text-[var(--ink-muted)] hover:text-[var(--cobalt)]"
                   aria-label="Edit title"
                 >
                   <Pencil size={14} />
@@ -141,9 +141,9 @@ export function ThreadDetail() {
               </div>
             )}
 
-            <div className="flex items-center gap-3 mt-2">
+            <div className="mt-2 flex flex-wrap items-center gap-2 sm:gap-3">
               <StatusBadge status={status} dormant={dormant} />
-              <span className="text-sm text-[var(--ink-muted)]">
+              <span className="min-w-0 break-words text-sm text-[var(--ink-muted)]">
                 {thread.folder}{thread.subfolder ? ` > ${thread.subfolder}` : ''}
               </span>
             </div>
@@ -178,11 +178,11 @@ export function ThreadDetail() {
           </div>
 
           {/* Action buttons */}
-          <div className="flex items-center gap-2">
+          <div className="flex w-full flex-wrap gap-2 sm:w-auto sm:flex-nowrap sm:shrink-0">
             {thread.archived_at || thread.abandoned_at ? (
               <button
                 onClick={() => reviveThread(thread.id)}
-                className="physical flex items-center gap-1 rounded-xl border-2 border-[var(--border)] bg-[var(--mint)] px-3 py-2 text-xs font-bold text-[var(--plum)]"
+                className="physical flex min-h-11 min-w-0 flex-1 items-center justify-center gap-1 rounded-xl border-2 border-[var(--border)] bg-[var(--mint)] px-3 py-2 text-xs font-bold text-[var(--plum)] sm:flex-none"
               >
                 <RotateCcw size={14} />
                 Revive
@@ -191,14 +191,14 @@ export function ThreadDetail() {
               <>
                 <button
                   onClick={() => archiveThread(thread.id)}
-                  className="physical flex items-center gap-1 rounded-xl border-2 border-[var(--border)] bg-[var(--cobalt)] px-3 py-2 text-xs font-bold text-white"
+                  className="physical flex min-h-11 min-w-0 flex-1 items-center justify-center gap-1 rounded-xl border-2 border-[var(--border)] bg-[var(--cobalt)] px-3 py-2 text-xs font-bold text-white sm:flex-none"
                 >
                   <Archive size={14} />
                   Archive
                 </button>
                 <button
                   onClick={() => abandonThread(thread.id)}
-                  className="physical flex items-center gap-1 rounded-xl border-2 border-[var(--border)] bg-[var(--coral)] px-3 py-2 text-xs font-bold text-white"
+                  className="physical flex min-h-11 min-w-0 flex-1 items-center justify-center gap-1 rounded-xl border-2 border-[var(--border)] bg-[var(--coral)] px-3 py-2 text-xs font-bold text-white sm:flex-none"
                 >
                   <Trash2 size={14} />
                   Abandon
@@ -260,7 +260,7 @@ export function ThreadDetail() {
                 const isBlocked = entry.type === 'blocker' && status === 'BLOCKED';
                 const isMilestone = entry.type === 'milestone';
                 return (
-                <motion.div key={entry.id} layout initial={timelineIds.current === null || newEntryIds.has(entry.id) ? { opacity: 0, y: 8 } : false} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25, delay: newEntryIds.has(entry.id) ? 0 : index * 0.06, ease: 'easeOut' }} className={`relative flex gap-4 pl-8 ${isMilestone ? 'motion-milestone' : ''}`}>
+                <motion.div key={entry.id} layout initial={newEntryIds.has(entry.id) ? { opacity: 0, y: 8 } : false} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25, delay: newEntryIds.has(entry.id) ? 0 : index * 0.06, ease: 'easeOut' }} className={`relative flex gap-4 pl-8 ${isMilestone ? 'motion-milestone' : ''}`}>
                   <div className={`absolute left-2 top-3 h-5 w-5 rounded-full border-[3px] border-[var(--border)] ${isBlocked ? 'blocker-indicator' : ''}`} style={{ backgroundColor: getEntryTypeColor(entry.type) }} />
                   <div className="surface-card flex-1 bg-white p-4">
                     <div className="flex items-center gap-2 mb-1">

@@ -7,6 +7,9 @@ import { useThreadStore } from './stores/threadStore';
 import { supabase } from './lib/supabase';
 import { AuthPage } from './pages/AuthPage';
 import { AppErrorBoundary } from './components/AppErrorBoundary';
+import { NotificationCenter } from './components/NotificationCenter';
+import { getReadyReengagementNotification, getLastAppOpen, markNotificationSent, setLastAppOpen } from './lib/reengagementNotifications';
+import { useNotifications } from './stores/notifications';
 import { Settings } from './pages/Settings';
 
 const DailyFeed = lazy(() => import('./pages/DailyFeed').then(({ DailyFeed: page }) => ({ default: page })));
@@ -25,6 +28,7 @@ export default function App() {
   const [loadError, setLoadError] = useState('');
   const loadAll = useThreadStore((s) => s.loadAll);
   const loading = useThreadStore((s) => s.loading);
+  const notify = useNotifications((s) => s.info);
 
   useEffect(() => {
     let mounted = true;
@@ -45,12 +49,21 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (session) {
-      void loadAll().catch((error: unknown) => {
-        setLoadError(error instanceof Error ? error.message : 'Unable to load your journal.');
-      });
-    }
-  }, [loadAll, session]);
+    if (!session) return;
+
+    void loadAll().then(() => {
+      const { threads, entries } = useThreadStore.getState();
+      const lastAppOpen = getLastAppOpen();
+      const notification = getReadyReengagementNotification(threads, entries, lastAppOpen);
+      if (notification) {
+        notify(notification.title, notification.message, 8000);
+        markNotificationSent(notification);
+      }
+      setLastAppOpen();
+    }).catch((error: unknown) => {
+      setLoadError(error instanceof Error ? error.message : 'Unable to load your journal.');
+    });
+  }, [loadAll, notify, session]);
 
   if (authLoading || (session && loading && !loadError)) {
     return (
@@ -91,21 +104,22 @@ export default function App() {
 
   return (
     <AppErrorBoundary>
-    <MotionConfig reducedMotion="user">
-      <BrowserRouter>
-        <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-[#f7f3ed] text-sm text-[#766e64]">Loading LifeThread...</div>}>
-          <Routes>
-            <Route element={<Layout />}>
-          <Route path="/" element={<DailyFeed />} />
-          <Route path="/threads" element={<OpenThreads />} />
-          <Route path="/ideas" element={<IdeasPark />} />
-          <Route path="/archive" element={<ArchiveView />} />
-          <Route path="/tags" element={<TagsView />} />
-          <Route path="/search" element={<SearchView />} />
-          <Route path="/thread/:id" element={<ThreadDetail />} />
-          <Route path="/stats" element={<StatsView />} />
-          <Route path="/export" element={<ExportView />} />
-          <Route path="/settings" element={<Settings />} />
+      <MotionConfig reducedMotion="user">
+        <BrowserRouter>
+          <NotificationCenter />
+          <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-[#f7f3ed] text-sm text-[#766e64]">Loading LifeThread...</div>}>
+            <Routes>
+              <Route element={<Layout />}>
+                <Route path="/" element={<DailyFeed />} />
+                <Route path="/threads" element={<OpenThreads />} />
+                <Route path="/ideas" element={<IdeasPark />} />
+                <Route path="/archive" element={<ArchiveView />} />
+                <Route path="/tags" element={<TagsView />} />
+                <Route path="/search" element={<SearchView />} />
+                <Route path="/thread/:id" element={<ThreadDetail />} />
+                <Route path="/stats" element={<StatsView />} />
+                <Route path="/export" element={<ExportView />} />
+                <Route path="/settings" element={<Settings />} />
               </Route>
             </Routes>
           </Suspense>

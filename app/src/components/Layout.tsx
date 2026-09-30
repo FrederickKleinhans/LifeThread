@@ -96,13 +96,6 @@ export function Layout() {
             <span className="hidden text-xs font-semibold text-[var(--ink-muted)] sm:inline">
               {location.pathname === '/' ? 'Daily Feed' : location.pathname === '/threads' ? 'Open Threads' : location.pathname.slice(1).replace('-', ' ')}
             </span>
-            <button
-              onClick={() => setShowNewThread(true)}
-              className="physical flex h-8 w-8 items-center justify-center rounded-lg border-2 border-[var(--border)] bg-[var(--butter)] text-[var(--plum)] shadow-[2px_2px_0_var(--border)] md:hidden"
-              aria-label="Create new thread"
-            >
-              <Plus size={17} strokeWidth={2.5} />
-            </button>
           </div>
         </div>
       </header>

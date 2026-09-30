@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { QuickCapture } from '../components/QuickCapture';
@@ -19,13 +19,13 @@ export function DailyFeed() {
   const entries = useThreadStore((state) => state.entries);
   const feedToShow = todayFeed.length > 0 ? todayFeed : allFeed.slice(0, 20);
   const showingAll = todayFeed.length === 0 && allFeed.length > 0;
-  const knownIds = useRef<Set<string> | null>(null);
-  const currentIds = new Set(feedToShow.map((item) => item.entry.id));
-  const newIds = knownIds.current
-    ? new Set(feedToShow.map((item) => item.entry.id).filter((entryId) => !knownIds.current?.has(entryId)))
-    : new Set<string>();
+  const previousIdsRef = useRef<Set<string>>(new Set());
+  const [newIds, setNewIds] = useState<Set<string>>(new Set());
+
   useEffect(() => {
-    knownIds.current = currentIds;
+    const currentIds = new Set(feedToShow.map((item) => item.entry.id));
+    setNewIds(new Set([...currentIds].filter((entryId) => !previousIdsRef.current.has(entryId))));
+    previousIdsRef.current = currentIds;
   }, [feedToShow]);
   const heroCopy = useMemo(() => {
     const hasBlocked = threads.some((thread) => inferStatus(thread, entries) === 'BLOCKED');

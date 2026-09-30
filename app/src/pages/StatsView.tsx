@@ -14,7 +14,7 @@ export function StatsView() {
   const previousStreak = useRef(stats.currentStreak);
   const [celebrating, setCelebrating] = useState(false);
   const celebratedMilestones = useRef(new Set<number>());
-  const streakMilestones = [7, 30, 100];
+  const streakMilestones = useMemo(() => [7, 30, 100], []);
 
   useEffect(() => {
     const milestone = streakMilestones.find((value) => stats.currentStreak >= value && previousStreak.current < value && !celebratedMilestones.current.has(value));
@@ -25,7 +25,7 @@ export function StatsView() {
       const timeout = window.setTimeout(() => setCelebrating(false), 1200);
       return () => window.clearTimeout(timeout);
     }
-  }, [stats.currentStreak]);
+  }, [stats.currentStreak, streakMilestones]);
 
   return (
     <div className="space-y-8">

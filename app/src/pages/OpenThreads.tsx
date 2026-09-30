@@ -90,10 +90,8 @@ export function OpenThreads() {
         <div className="flex items-center gap-2 flex-wrap">
           <button
             onClick={() => setStatusFilter('ALL')}
-            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
-              statusFilter === 'ALL'
-                ? 'bg-[#ebe9f8] text-[#4f46a5]'
-                : 'bg-[#eee7dc] text-[#766e64] hover:bg-[#e4dbcf]'
+            className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+              statusFilter === 'ALL' ? 'bg-[var(--filter-active-bg)] text-[var(--filter-active-text)]' : 'bg-[var(--filter-idle-bg)] text-[var(--filter-idle-text)] hover:bg-[var(--filter-idle-hover)]'
             }`}
           >
             All
@@ -102,10 +100,8 @@ export function OpenThreads() {
             <button
               key={s}
               onClick={() => setStatusFilter(s)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
-                statusFilter === s
-                  ? 'bg-[#ebe9f8] text-[#4f46a5]'
-                  : 'bg-[#eee7dc] text-[#766e64] hover:bg-[#e4dbcf]'
+              className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                statusFilter === s ? 'bg-[var(--filter-active-bg)] text-[var(--filter-active-text)]' : 'bg-[var(--filter-idle-bg)] text-[var(--filter-idle-text)] hover:bg-[var(--filter-idle-hover)]'
               }`}
             >
               {s}

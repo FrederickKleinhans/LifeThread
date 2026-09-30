@@ -17,6 +17,11 @@
   --ink: var(--plum);
   --ink-muted: #6A6090;
   --border: var(--plum);
+  --filter-active-bg: #ebe9f8;
+  --filter-active-text: #4f46a5;
+  --filter-idle-bg: #eee7dc;
+  --filter-idle-text: #766e64;
+  --filter-idle-hover: #e4dbcf;
   --color-log: var(--white);
   --color-note: var(--white);
   --color-blocker: var(--coral);
@@ -31,18 +36,74 @@
   :root:not([data-theme="light"]) {
     --bg-page: #15102B;
     --bg-surface: #1F1A3B;
+    --lilac: #221C3F;
+    --plum: #F2EFFF;
     --ink: #F2EFFF;
     --ink-muted: #A398D0;
     --border: #3A2F66;
+    --filter-active-bg: #453b70;
+    --filter-active-text: #fff;
+    --filter-idle-bg: #2a2448;
+    --filter-idle-text: #d4ccef;
+    --filter-idle-hover: #39305d;
+  }
+
+  :root:not([data-theme="light"]) .surface-card,
+  :root:not([data-theme="light"]) [class~="bg-white"],
+  :root:not([data-theme="light"]) [class~="bg-[#fbf9f6]"] {
+    background-color: var(--bg-surface);
+  }
+
+  :root:not([data-theme="light"]) [class~="text-[#27231f]"],
+  :root:not([data-theme="light"]) [class~="text-[#4b443c]"],
+  :root:not([data-theme="light"]) [class~="text-[#5f574e]"],
+  :root:not([data-theme="light"]) [class~="text-[#766e64]"],
+  :root:not([data-theme="light"]) [class~="text-[#8d8378]"],
+  :root:not([data-theme="light"]) [class~="text-[#9a9186]"],
+  :root:not([data-theme="light"]) [class~="text-gray-900"],
+  :root:not([data-theme="light"]) [class~="text-gray-700"] {
+    color: var(--ink);
+  }
+
+  :root:not([data-theme="light"]) .mobile-nav {
+    background: color-mix(in srgb, var(--bg-surface) 94%, transparent);
   }
 }
 
 :root[data-theme="dark"] {
   --bg-page: #15102B;
   --bg-surface: #1F1A3B;
+  --lilac: #221C3F;
+  --plum: #F2EFFF;
   --ink: #F2EFFF;
   --ink-muted: #A398D0;
   --border: #3A2F66;
+  --filter-active-bg: #453b70;
+  --filter-active-text: #fff;
+  --filter-idle-bg: #2a2448;
+  --filter-idle-text: #d4ccef;
+  --filter-idle-hover: #39305d;
+}
+
+:root[data-theme="dark"] .surface-card,
+:root[data-theme="dark"] [class~="bg-white"],
+:root[data-theme="dark"] [class~="bg-[#fbf9f6]"] {
+  background-color: var(--bg-surface);
+}
+
+:root[data-theme="dark"] [class~="text-[#27231f]"],
+:root[data-theme="dark"] [class~="text-[#4b443c]"],
+:root[data-theme="dark"] [class~="text-[#5f574e]"],
+:root[data-theme="dark"] [class~="text-[#766e64]"],
+:root[data-theme="dark"] [class~="text-[#8d8378]"],
+:root[data-theme="dark"] [class~="text-[#9a9186]"],
+:root[data-theme="dark"] [class~="text-gray-900"],
+:root[data-theme="dark"] [class~="text-gray-700"] {
+  color: var(--ink);
+}
+
+:root[data-theme="dark"] .mobile-nav {
+  background: color-mix(in srgb, var(--bg-surface) 94%, transparent);
 }
 
 html, body, #root { min-height: 100%; }

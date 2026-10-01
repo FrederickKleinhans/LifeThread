@@ -1,5 +1,7 @@
+import { useEffect } from 'react';
 import { CheckCircle2, Info, X, XCircle } from 'lucide-react';
 import { useNotifications } from '../stores/notifications';
+import { markNotificationOpened } from '../lib/reengagementNotifications';
 
 const toneStyles = {
   info: 'border-[#d8cdbf] bg-[#fbf9f6] text-[#4b443c]',
@@ -17,10 +19,14 @@ export function NotificationCenter() {
   const notifications = useNotifications((state) => state.items);
   const dismiss = useNotifications((state) => state.dismiss);
 
+  useEffect(() => {
+    for (const notification of notifications) markNotificationOpened(notification.id);
+  }, [notifications]);
+
   if (!notifications.length) return null;
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 top-4 z-[70] flex justify-center px-4">
+    <div aria-live="polite" className="pointer-events-none fixed inset-x-0 top-4 z-[70] flex justify-center px-4">
       <div className="flex w-full max-w-md flex-col gap-2">
         {notifications.map((notification) => {
           const Icon = toneIcons[notification.tone];

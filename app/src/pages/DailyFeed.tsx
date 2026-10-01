@@ -17,7 +17,10 @@ export function DailyFeed() {
   const updateThread = useThreadStore((state) => state.updateThread);
   const threads = useThreadStore((state) => state.threads);
   const entries = useThreadStore((state) => state.entries);
-  const feedToShow = todayFeed.length > 0 ? todayFeed : allFeed.slice(0, 20);
+  const feedToShow = useMemo(
+    () => todayFeed.length > 0 ? todayFeed : allFeed.slice(0, 20),
+    [allFeed, todayFeed],
+  );
   const showingAll = todayFeed.length === 0 && allFeed.length > 0;
   const previousIdsRef = useRef<Set<string>>(new Set());
   const [newIds, setNewIds] = useState<Set<string>>(new Set());

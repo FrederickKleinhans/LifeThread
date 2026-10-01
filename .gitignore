@@ -1,0 +1,18 @@
+.DS_Store
+**/.DS_Store
+.env*
+!app/.env.example
+!app/.env.test
+
+# JavaScript dependencies and generated test/build output
+node_modules/
+**/node_modules/
+app/dist/
+app/coverage/
+app/.vite/
+
+# Local logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*

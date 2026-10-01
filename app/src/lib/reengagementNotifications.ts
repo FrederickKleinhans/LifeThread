@@ -1,4 +1,3 @@
-import { differenceInDays } from 'date-fns';
 import type { Entry, Thread } from '../types';
 import { inferStatus } from '../utils/statusInference';
 import { getFullStats } from '../utils/gamification';
@@ -20,9 +19,11 @@ export interface NotificationPreference {
 }
 
 export interface NotificationHistoryItem {
+  notificationId?: string;
   trigger: ReengagementTrigger;
   category: NotificationCategory;
   threadId?: string;
+  copy?: string;
   sentAt: number;
   opened: boolean;
 }
@@ -33,6 +34,7 @@ export interface ReengagementNotification {
   trigger: ReengagementTrigger;
   category: NotificationCategory;
   threadId?: string;
+  copy: string;
 }
 
 const STORE_KEY = 'lifethread-notification-history';
@@ -102,22 +104,23 @@ function writeNotificationHistory(history: NotificationHistoryItem[]) {
   window.localStorage.setItem(STORE_KEY, JSON.stringify(history.slice(-50)));
 }
 
-export function markNotificationSent(notification: ReengagementNotification) {
+export function markNotificationSent(notification: ReengagementNotification, notificationId?: string) {
   const history = getNotificationHistory();
   history.push({
+    notificationId,
     trigger: notification.trigger,
     category: notification.category,
     threadId: notification.threadId,
+    copy: notification.message,
     sentAt: Date.now(),
     opened: false,
   });
   writeNotificationHistory(history);
 }
 
-export function markNotificationsOpened() {
+export function markNotificationOpened(notificationId: string) {
   const history = getNotificationHistory();
-  const now = Date.now();
-  const next = history.map((item) => ({ ...item, opened: item.opened || item.sentAt <= now }));
+  const next = history.map((item) => item.notificationId === notificationId ? { ...item, opened: true } : item);
   writeNotificationHistory(next);
 }
 
@@ -128,13 +131,32 @@ export function getLastAppOpen(): number {
 
 export function setLastAppOpen(timestamp = Date.now()) {
   window.localStorage.setItem(LAST_OPEN_KEY, String(timestamp));
-  markNotificationsOpened();
+}
+
+function localDayKey(timestamp: number, timeZone?: string) {
+  const date = new Date(timestamp);
+  const parts = new Intl.DateTimeFormat('en', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(date);
+  const part = (type: Intl.DateTimeFormatPartTypes) => parts.find((value) => value.type === type)?.value ?? '';
+  return `${part('year')}-${part('month')}-${part('day')}`;
+}
+
+function sameLocalDay(left: number, right: number, timeZone?: string) {
+  return localDayKey(left, timeZone) === localDayKey(right, timeZone);
+}
+
+function elapsedDays(timestamp: number, now: number) {
+  return Math.floor((now - timestamp) / (24 * 60 * 60 * 1000));
 }
 
 export function hasUserOpenedToday(): boolean {
   const last = getLastAppOpen();
   if (!last) return false;
-  return differenceInDays(new Date(), new Date(last)) === 0;
+  return sameLocalDay(last, Date.now());
 }
 
 function getThreadTitleForNotification(title: string) {
@@ -143,7 +165,7 @@ function getThreadTitleForNotification(title: string) {
   return `${trimmed.slice(0, 25)}…`;
 }
 
-function getCopyForTrigger(trigger: ReengagementTrigger, title: string, n?: number, milestone?: number): string {
+function getCopyForTrigger(trigger: ReengagementTrigger, title: string, n?: number, milestone?: number, history = getNotificationHistory()): string {
   const threadTitle = getThreadTitleForNotification(title);
   const buckets = trigger === 'stale-blocked'
     ? threadCheckInCopy['stale-blocked']
@@ -158,7 +180,9 @@ function getCopyForTrigger(trigger: ReengagementTrigger, title: string, n?: numb
   const rotationKey = `${trigger}:${title}:${Math.max(0, Math.min(999, (n ?? milestone ?? 0) % buckets.length))}`;
   const index = Math.abs(rotationKey.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0)) % buckets.length;
 
-  const template = buckets[index];
+  const previousCopy = [...history].reverse().find((item) => item.trigger === trigger)?.copy;
+  const selectedIndex = buckets.length > 1 && buckets[index] === previousCopy ? (index + 1) % buckets.length : index;
+  const template = buckets[selectedIndex];
   if (trigger === 'stale-blocked') {
     return template
       .replace('{thread title}', threadTitle)
@@ -176,39 +200,38 @@ function getCopyForTrigger(trigger: ReengagementTrigger, title: string, n?: numb
   return template;
 }
 
-function hasRecentIgnoredNotifications(history: NotificationHistoryItem[], limit = 2): boolean {
-  const recent = history
-    .filter((item) => Date.now() - item.sentAt <= 1000 * 60 * 60 * 24 * 4)
-    .slice(-limit);
-  return recent.filter((item) => !item.opened).length >= limit;
+function hasRecentIgnoredNotifications(history: NotificationHistoryItem[], now: number, limit = 2): boolean {
+  const recent = [...history].sort((a, b) => b.sentAt - a.sentAt).slice(0, limit);
+  return recent.length >= limit && recent.every((item) => !item.opened) &&
+    now - recent[0].sentAt < 1000 * 60 * 60 * 24 * 2;
 }
 
-function isBlockedThread(thread: Thread, entries: Entry[]) {
-  const status = inferStatus(thread, entries);
-  const latest = [...entries].filter((entry) => entry.thread_id === thread.id).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0];
+function isBlockedThread(thread: Thread, threadEntries: Entry[], now: number) {
+  const status = inferStatus(thread, threadEntries);
+  const latest = threadEntries[0];
   if (!latest || status !== 'BLOCKED') return false;
-  return differenceInDays(new Date(), new Date(latest.created_at)) >= 5;
+  return elapsedDays(new Date(latest.created_at).getTime(), now) >= 5;
 }
 
-function isWaitingThread(thread: Thread, entries: Entry[]) {
-  const threadEntries = [...entries].filter((entry) => entry.thread_id === thread.id).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+function isWaitingThread(threadEntries: Entry[], now: number) {
   const latest = threadEntries[0];
   if (!latest || latest.type !== 'waiting') return false;
-  return differenceInDays(new Date(), new Date(latest.created_at)) >= 4;
+  return elapsedDays(new Date(latest.created_at).getTime(), now) >= 4;
 }
 
-function isDormantThread(thread: Thread, entries: Entry[]) {
-  const threadEntries = [...entries].filter((entry) => entry.thread_id === thread.id).sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+function isDormantThread(thread: Thread, threadEntriesDescending: Entry[], now: number) {
+  if (inferStatus(thread, threadEntriesDescending) === 'DONE') return false;
+  const threadEntries = [...threadEntriesDescending].reverse();
   if (threadEntries.length < 5) return false;
   const latest = threadEntries[threadEntries.length - 1];
-  if (differenceInDays(new Date(), new Date(latest.created_at)) < 14) return false;
+  if (elapsedDays(new Date(latest.created_at).getTime(), now) < 14) return false;
 
   let maxWindow = 0;
   for (let i = 0; i < threadEntries.length; i += 1) {
     let count = 0;
     for (let j = i; j < threadEntries.length; j += 1) {
-      const delta = differenceInDays(new Date(threadEntries[j].created_at), new Date(threadEntries[i].created_at));
-      if (delta <= 7) {
+      const delta = new Date(threadEntries[j].created_at).getTime() - new Date(threadEntries[i].created_at).getTime();
+      if (delta <= 7 * 24 * 60 * 60 * 1000) {
         count += 1;
       } else {
         break;
@@ -231,9 +254,9 @@ function getMilestoneApproach(streak: number) {
   return null;
 }
 
-function hasSameTriggerThreadRecently(history: NotificationHistoryItem[], trigger: ReengagementTrigger, threadId?: string): boolean {
+function hasSameTriggerThreadRecently(history: NotificationHistoryItem[], trigger: ReengagementTrigger, threadId: string | undefined, now: number): boolean {
   if (!threadId) return false;
-  return history.some((item) => item.trigger === trigger && item.threadId === threadId && Date.now() - item.sentAt <= 1000 * 60 * 60 * 24 * 7);
+  return history.some((item) => item.trigger === trigger && item.threadId === threadId && now - item.sentAt <= 1000 * 60 * 60 * 24 * 7);
 }
 
 export function pickReengagementNotification({
@@ -242,80 +265,103 @@ export function pickReengagementNotification({
   streak,
   lastAppOpen,
   history = getNotificationHistory(),
+  preferences = getNotificationPreferences(),
+  timeZone,
+  now = Date.now(),
 }: {
   threads: Thread[];
   entries: Entry[];
   streak: number;
   lastAppOpen: number;
   history?: NotificationHistoryItem[];
+  preferences?: NotificationPreference;
+  timeZone?: string;
+  now?: number;
 }): ReengagementNotification | null {
-  const preferences = getNotificationPreferences();
   if (!preferences.enabled) return null;
-  if (!lastAppOpen || differenceInDays(new Date(), new Date(lastAppOpen)) === 0) return null;
-  if (hasRecentIgnoredNotifications(history)) return null;
+  if (!lastAppOpen || sameLocalDay(lastAppOpen, now, timeZone)) return null;
+  if (history.some((item) => sameLocalDay(item.sentAt, now, timeZone))) return null;
+  if (hasRecentIgnoredNotifications(history, now)) return null;
 
   const activeThreads = threads.filter((thread) => !thread.archived_at && !thread.abandoned_at);
+  const entriesByThread = new Map<string, Entry[]>();
+  for (const entry of entries) {
+    const existing = entriesByThread.get(entry.thread_id);
+    if (existing) existing.push(entry);
+    else entriesByThread.set(entry.thread_id, [entry]);
+  }
+  for (const list of entriesByThread.values()) {
+    list.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  }
 
   const staleBlocked = activeThreads
-    .map((thread) => ({ thread, status: inferStatus(thread, entries) }))
-    .find(({ thread, status }) => status === 'BLOCKED' && isBlockedThread(thread, entries) && !hasSameTriggerThreadRecently(history, 'stale-blocked', thread.id));
+    .find((thread) => {
+      const threadEntries = entriesByThread.get(thread.id) ?? [];
+      return isBlockedThread(thread, threadEntries, now) && !hasSameTriggerThreadRecently(history, 'stale-blocked', thread.id, now);
+    });
 
   if (staleBlocked && preferences.threadCheckIns) {
-    const days = differenceInDays(new Date(), new Date([...entries].filter((entry) => entry.thread_id === staleBlocked.thread.id).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0].created_at));
-    const title = getCopyForTrigger('stale-blocked', staleBlocked.thread.title, days);
+    const latest = entriesByThread.get(staleBlocked.id)?.[0];
+    const days = latest ? elapsedDays(new Date(latest.created_at).getTime(), now) : 0;
     return {
-      title,
-      message: getCopyForTrigger('stale-blocked', staleBlocked.thread.title, days),
+      title: 'Still blocked?',
+      message: getCopyForTrigger('stale-blocked', staleBlocked.title, days, undefined, history),
       trigger: 'stale-blocked',
       category: 'thread-check-ins',
-      threadId: staleBlocked.thread.id,
+      threadId: staleBlocked.id,
+      copy: getCopyForTrigger('stale-blocked', staleBlocked.title, days, undefined, history),
     };
   }
 
-  const overdueWaiting = activeThreads.find((thread) => isWaitingThread(thread, entries) && !hasSameTriggerThreadRecently(history, 'overdue-waiting', thread.id));
+  const overdueWaiting = activeThreads.find((thread) => isWaitingThread(entriesByThread.get(thread.id) ?? [], now) && !hasSameTriggerThreadRecently(history, 'overdue-waiting', thread.id, now));
   if (overdueWaiting && preferences.threadCheckIns) {
-    const title = getCopyForTrigger('overdue-waiting', overdueWaiting.title);
     return {
-      title,
-      message: getCopyForTrigger('overdue-waiting', overdueWaiting.title),
+      title: 'Still waiting?',
+      message: getCopyForTrigger('overdue-waiting', overdueWaiting.title, undefined, undefined, history),
       trigger: 'overdue-waiting',
       category: 'thread-check-ins',
       threadId: overdueWaiting.id,
+      copy: getCopyForTrigger('overdue-waiting', overdueWaiting.title, undefined, undefined, history),
     };
   }
 
-  const dormancyCandidate = activeThreads.find((thread) => isDormantThread(thread, entries) && !hasSameTriggerThreadRecently(history, 'dormancy', thread.id));
+  const dormancyCandidate = activeThreads.find((thread) => isDormantThread(thread, entriesByThread.get(thread.id) ?? [], now) && !hasSameTriggerThreadRecently(history, 'dormancy', thread.id, now));
   if (dormancyCandidate && preferences.threadCheckIns) {
-    const title = getCopyForTrigger('dormancy', dormancyCandidate.title);
     return {
-      title,
-      message: getCopyForTrigger('dormancy', dormancyCandidate.title),
+      title: 'A thread went quiet',
+      message: getCopyForTrigger('dormancy', dormancyCandidate.title, undefined, undefined, history),
       trigger: 'dormancy',
       category: 'thread-check-ins',
       threadId: dormancyCandidate.id,
+      copy: getCopyForTrigger('dormancy', dormancyCandidate.title, undefined, undefined, history),
     };
   }
 
   const streakMilestone = getMilestoneApproach(streak);
-  if (streakMilestone && preferences.streakMilestones && !history.some((item) => item.trigger === 'streak-milestone' && item.sentAt > Date.now() - 1000 * 60 * 60 * 24 * 2)) {
-    const title = getCopyForTrigger('streak-milestone', '', 0, streakMilestone);
+  if (streakMilestone && preferences.streakMilestones && !history.some((item) => item.trigger === 'streak-milestone' && item.sentAt > now - 1000 * 60 * 60 * 24 * 2)) {
     return {
-      title,
-      message: getCopyForTrigger('streak-milestone', '', 0, streakMilestone),
+      title: 'A milestone is close',
+      message: getCopyForTrigger('streak-milestone', '', 0, streakMilestone, history),
       trigger: 'streak-milestone',
       category: 'streak-milestones',
+      copy: getCopyForTrigger('streak-milestone', '', 0, streakMilestone, history),
     };
   }
 
-  const daysSinceLastOpen = differenceInDays(new Date(), new Date(lastAppOpen));
-  const hasRecentGentlePrompt = history.some((item) => item.trigger === 'gentle-prompt' && Date.now() - item.sentAt <= 1000 * 60 * 60 * 24 * 4);
+  const daysSinceLastOpen = elapsedDays(lastAppOpen, now);
+  const hasRecentGentlePrompt = history.some((item) => item.trigger === 'gentle-prompt' && now - item.sentAt <= 1000 * 60 * 60 * 24 * 4);
   if (daysSinceLastOpen >= 3 && !hasRecentGentlePrompt && preferences.gentlePrompts) {
-    const title = gentlePromptCopy[history.filter((item) => item.trigger === 'gentle-prompt').length % gentlePromptCopy.length];
+    const promptIndex = history.filter((item) => item.trigger === 'gentle-prompt').length % gentlePromptCopy.length;
+    const previousPrompt = [...history].reverse().find((item) => item.trigger === 'gentle-prompt')?.copy;
+    const message = gentlePromptCopy.length > 1 && gentlePromptCopy[promptIndex] === previousPrompt
+      ? gentlePromptCopy[(promptIndex + 1) % gentlePromptCopy.length]
+      : gentlePromptCopy[promptIndex];
     return {
-      title,
-      message: title,
+      title: 'A LifeThread check-in',
+      message,
       trigger: 'gentle-prompt',
       category: 'gentle-prompts',
+      copy: message,
     };
   }
 

@@ -16,6 +16,7 @@ import {
   MoreHorizontal,
 } from 'lucide-react';
 import { NewThreadModal } from './NewThreadModal';
+import { SyncReviewBanner } from './SyncReviewBanner';
 import { supabase } from '../lib/supabase';
 import { useThreadStore } from '../stores/threadStore';
 
@@ -209,6 +210,8 @@ export function Layout() {
       >
         <Plus size={24} />
       </button>
+
+      <SyncReviewBanner />
 
       {/* New Thread Modal */}
       {showNewThread && (

@@ -8,9 +8,12 @@ import { supabase } from './lib/supabase';
 import { AuthPage } from './pages/AuthPage';
 import { AppErrorBoundary } from './components/AppErrorBoundary';
 import { NotificationCenter } from './components/NotificationCenter';
-import { getReadyReengagementNotification, getLastAppOpen, markNotificationSent, setLastAppOpen } from './lib/reengagementNotifications';
+import { getReadyReengagementNotification, getLastAppOpen, hasUserOpenedToday, markNotificationSent, setLastAppOpen } from './lib/reengagementNotifications';
 import { useNotifications } from './stores/notifications';
 import { Settings } from './pages/Settings';
+import { enqueueMutation } from './lib/mutationQueue';
+import { getMutationErrorMessage, isRetryableMutationError } from './lib/mutationErrors';
+import { markRemoteNotificationOpened, updateRemoteProfile } from './lib/remoteRepository';
 
 const DailyFeed = lazy(() => import('./pages/DailyFeed').then(({ DailyFeed: page }) => ({ default: page })));
 const OpenThreads = lazy(() => import('./pages/OpenThreads').then(({ OpenThreads: page }) => ({ default: page })));
@@ -21,6 +24,7 @@ const SearchView = lazy(() => import('./pages/SearchView').then(({ SearchView: p
 const ThreadDetail = lazy(() => import('./pages/ThreadDetail').then(({ ThreadDetail: page }) => ({ default: page })));
 const ExportView = lazy(() => import('./pages/ExportView').then(({ ExportView: page }) => ({ default: page })));
 const StatsView = lazy(() => import('./pages/StatsView').then(({ StatsView: page }) => ({ default: page })));
+const SyncReview = lazy(() => import('./pages/SyncReview').then(({ SyncReview: page }) => ({ default: page })));
 
 export default function App() {
   const [session, setSession] = useState<Session | null>(null);
@@ -54,12 +58,39 @@ export default function App() {
     void loadAll().then(() => {
       const { threads, entries } = useThreadStore.getState();
       const lastAppOpen = getLastAppOpen();
-      const notification = getReadyReengagementNotification(threads, entries, lastAppOpen);
-      if (notification) {
-        notify(notification.title, notification.message, 8000);
-        markNotificationSent(notification);
+      const shouldUpdateLastOpen = !hasUserOpenedToday();
+      const openedNotificationId = new URLSearchParams(window.location.search).get('notificationId');
+      if (openedNotificationId) {
+        window.history.replaceState(null, '', window.location.pathname + window.location.hash);
+        void markRemoteNotificationOpened(openedNotificationId).catch((error: unknown) => {
+          useNotifications.getState().error('Could not update notification status', getMutationErrorMessage(error), 5000);
+        });
+      } else {
+        const notification = getReadyReengagementNotification(threads, entries, lastAppOpen);
+        if (notification) {
+          const notificationId = notify(notification.title, notification.message, 8000);
+          markNotificationSent(notification, notificationId);
+        }
       }
-      setLastAppOpen();
+      const openedAt = Date.now();
+      setLastAppOpen(openedAt);
+      const profileUpdates = {
+        last_app_open_at: new Date(openedAt).toISOString(),
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      };
+      if (shouldUpdateLastOpen) {
+        void updateRemoteProfile(profileUpdates).catch(async (error: unknown) => {
+          if (isRetryableMutationError(error)) {
+            try {
+              await enqueueMutation({ kind: 'updateProfile', value: profileUpdates });
+            } catch (queueError) {
+              useNotifications.getState().error('Could not save check-in status', getMutationErrorMessage(queueError), 5000);
+            }
+          } else {
+            useNotifications.getState().error('Could not save check-in status', getMutationErrorMessage(error), 5000);
+          }
+        });
+      }
     }).catch((error: unknown) => {
       setLoadError(error instanceof Error ? error.message : 'Unable to load your journal.');
     });
@@ -120,6 +151,7 @@ export default function App() {
                 <Route path="/stats" element={<StatsView />} />
                 <Route path="/export" element={<ExportView />} />
                 <Route path="/settings" element={<Settings />} />
+                <Route path="/sync-review" element={<SyncReview />} />
               </Route>
             </Routes>
           </Suspense>

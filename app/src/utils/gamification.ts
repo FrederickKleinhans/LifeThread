@@ -276,6 +276,10 @@ export function evaluateAchievements(threads: Thread[], entries: Entry[]): Achie
 }
 
 export function getFullStats(threads: Thread[], entries: Entry[]): GamificationStats {
+  const lastEntry = entries[entries.length - 1];
+  const cacheKey = `${threads.length}:${entries.length}:${lastEntry?.id ?? ''}`;
+  if (fullStatsCache?.key === cacheKey) return fullStatsCache.value;
+
   const totalXP = calculateXP(threads, entries);
   const levelInfo = getLevel(totalXP);
   const { current: currentStreak, longest: longestStreak } = calculateStreak(entries);
@@ -283,7 +287,7 @@ export function getFullStats(threads: Thread[], entries: Entry[]): GamificationS
   const weeklyXP = getWeeklyXP(entries);
   const completedThreads = entries.filter((e) => e.type === 'completed').length;
 
-  return {
+  const stats = {
     totalXP,
     level: levelInfo.level,
     levelTitle: levelInfo.title,
@@ -298,4 +302,12 @@ export function getFullStats(threads: Thread[], entries: Entry[]): GamificationS
     achievements,
     weeklyXP,
   };
+  fullStatsCache = { key: cacheKey, value: stats };
+  return stats;
+}
+
+let fullStatsCache: { key: string; value: GamificationStats } | null = null;
+
+export function invalidateFullStatsCache() {
+  fullStatsCache = null;
 }

@@ -102,3 +102,53 @@ $$;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
+
+alter table public.entries
+  add column if not exists updated_at timestamptz not null default now();
+
+alter table public.profiles
+  add column if not exists push_subscription jsonb,
+  add column if not exists notification_preferences jsonb not null default
+    '{"enabled":true,"threadCheckIns":true,"streakMilestones":true,"gentlePrompts":true}'::jsonb,
+  add column if not exists last_app_open_at timestamptz,
+  add column if not exists timezone text;
+
+create table if not exists public.notification_history (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.profiles (id) on delete cascade,
+  trigger text not null,
+  category text not null,
+  thread_id uuid,
+  copy text not null,
+  sent_at timestamptz not null default now(),
+  opened_at timestamptz
+);
+
+create index if not exists notification_history_user_sent_idx
+  on public.notification_history (user_id, sent_at desc);
+
+alter table public.notification_history enable row level security;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public' and tablename = 'notification_history'
+      and policyname = 'Users can view their notification history'
+  ) then
+    create policy "Users can view their notification history"
+      on public.notification_history for select
+      using ((select auth.uid()) = user_id);
+  end if;
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public' and tablename = 'notification_history'
+      and policyname = 'Users can update their notification history'
+  ) then
+    create policy "Users can update their notification history"
+      on public.notification_history for update
+      using ((select auth.uid()) = user_id)
+      with check ((select auth.uid()) = user_id);
+  end if;
+end;
+$$;

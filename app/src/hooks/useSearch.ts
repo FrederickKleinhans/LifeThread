@@ -17,6 +17,7 @@ export function useSearch() {
     if (!query.trim()) return [];
 
     const q = query.toLowerCase().trim();
+    const threadsById = new Map(threads.map((thread) => [thread.id, thread]));
     const matchedThreadIds = new Set<string>();
     const threadResults: SearchResult[] = [];
 
@@ -51,7 +52,7 @@ export function useSearch() {
 
     // Build results
     for (const threadId of matchedThreadIds) {
-      const thread = threads.find((t) => t.id === threadId);
+      const thread = threadsById.get(threadId);
       if (!thread) continue;
       threadResults.push({
         thread,

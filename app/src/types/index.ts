@@ -38,6 +38,7 @@ export interface Entry {
   body: string;
   attachment_url: string | null;
   created_at: string;
+  updated_at?: string;
 }
 
 export interface Tag {
